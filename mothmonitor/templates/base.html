@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{% block title %}{{title}}{%endblock%} | Moth Monitor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/pure-min.css" integrity="sha384-X38yfunGUhNzHpBaEBsWLO+A0HDYOQi8ufWDkZ0k9e0eXz/tH3II7uKZ9msv++Ls" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/grids-responsive-min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/menus-min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+
+    <script src="/static/js/vendor/htmx.min.js"></script>
+    
+  </head>
+  <body>
+    <div class="pure-g">
+      <nav class="sidebar pure-u-1 pure-u-md-1-4">
+        <header>Moth Monitor</header>
+        <div class="pure-menu pure-menu-scrollable">
+          <ul class="pure-menu-list">
+            <li class="pure-menu-item"><a href="/dashboard" class="pure-menu-link">Dashboard</a></li>
+            <li class="pure-menu-item"><a href="/" class="pure-menu-link">Devices</a></li>
+            <li class="pure-menu-item"><a href="/" class="pure-menu-link">Datasets</a></li>
+          </ul>
+        </div>
+      </nav>
+      <main class="content pure-u-1 pure-u-md-3-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <ul class=flashes>
+          {% for category, message in messages %}
+          <li class="{{category}}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}      
+
+        {% block content %}
+
+        {% endblock %}
+      </main>
+      </main>
+    </div>
+    
+  </body>
+</html>

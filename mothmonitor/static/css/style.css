@@ -1,0 +1,127 @@
+:root {
+    --gallery-per-row: 5;
+    --error-color: #933;
+    --button-color: #aaf;
+    --button-border-color: #339;
+    --ok-color: #393;
+}
+
+body {
+    font-family: system-ui, -apple-system, blinkmacsystemfont, "Segoe UI", roboto, "Helvetica Neue", arial, sans-serif, "Segoe UI Emoji";
+}
+
+.sidebar {
+    background-color: #f5f6fa;
+    border-right: 1px solid #eeebee;    
+}
+
+@media (min-width: 48em) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+  }
+}
+
+.sidebar header {
+    margin: 2em 0 0 2em;
+    font-size: larger;
+    
+}
+
+.sidebar .pure-menu {
+    margin-left: 2em;
+    
+}
+@media (max-width: 48em) {
+  /* HORIZONTAL MENU */
+  .sidebar .pure-menu {
+      white-space: nowrap;
+}
+
+  .sidebar .pure-menu .pure-menu-list {
+    display: inline-block;
+}
+
+  .sidebar .pure-menu .pure-menu-item,
+  .sidebar .pure-menu .pure-menu-heading,
+  .sidebar .pure-menu .pure-menu-separator {
+      display: inline-block;
+      vertical-align: middle;
+  }
+  .sidebar .pure-menu.pure-menu-scrollable {
+    white-space: nowrap;
+    overflow-y: hidden;
+    overflow-x: auto;
+    /* a little extra padding for this style to allow for scrollbars */
+    padding: .5em 0;
+  }  
+}
+
+
+.content {
+    padding: 2em 3em 0;
+    margin-left: 25%;
+}
+
+
+/* Forms */
+
+form fieldset {
+    margin: 0.5rem;
+}
+form fieldset>label {
+    font-size: larger;
+    font-style: italic;
+    padding-bottom: 0.5rem;
+    display: block;
+}
+
+ul.errors {
+    color: var(--error-color);
+}
+
+form dt.form-label {
+    text-align: left;
+}
+
+form dd {
+    padding: 0.2em;
+    padding-right: 2rem;
+}
+
+form .save, button {
+    background-color: var(--button-color);
+    padding: 0.5rem;
+    border: 1px solid var(--button-border-color);
+    border-radius: 0.5rem;
+}
+
+form .save, button.action {
+    margin-top: 2rem;
+    margin-right: 1rem;
+}
+
+.login-form dd {
+    margin-left: 0;
+}
+
+/* Flash messages */
+
+ul.flashes {
+    width: 100%;
+    padding-left: 0px;
+    list-style-type: none;
+}
+
+ul.flashes li {
+    padding: 0.5rem;
+    color: white;
+    background-color: #666
+}
+ul.flashes li.ok {
+    background-color: var(--ok-color);
+}
+ul.flashes li.error {
+    background-color: var(--error-color);
+}
