@@ -25,8 +25,25 @@ body {
 
 .sidebar header {
     margin: 2em 0 0 2em;
-    font-size: larger;
     
+}
+
+.sidebar header h1 {
+    display: inline-block;
+    font-size: large;
+}
+
+.sidebar header img {
+    display: block;
+    width: 7em;
+}
+
+@media (max-width: 48em) {
+    .sidebar header img {
+        display: inline-block;
+        width: 4em;
+        vertical-align: sub;
+    }
 }
 
 .sidebar .pure-menu {
@@ -64,6 +81,13 @@ body {
     margin-left: 25%;
 }
 
+@media (max-width: 48em) {
+    .content {
+        padding: 2em 0;
+        margin-left: 5%;
+    }
+}
+
 
 /* Forms */
 
@@ -71,7 +95,7 @@ form fieldset {
     margin: 0.5rem;
 }
 form fieldset>label {
-    font-size: larger;
+    font-size: large;
     font-style: italic;
     padding-bottom: 0.5rem;
     display: block;
