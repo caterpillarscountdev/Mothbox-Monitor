@@ -1,14 +1,9 @@
-from flask_login import LoginManager
+from flask_security import Security, SQLAlchemyUserDatastore
 
-from .models import User
+from .models import db, User, Role
 
-login_manager = LoginManager()
-
-login_manager.login_view = 'auth.login'
-
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
+user_datastore = SQLAlchemyUserDatastore(db, User, Role)
+security = Security(datastore=user_datastore)
 
 def init_app(app):
-    login_manager.init_app(app)
+    security.init_app(app)
