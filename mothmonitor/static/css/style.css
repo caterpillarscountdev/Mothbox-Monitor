@@ -1,17 +1,17 @@
 :root {
     --gallery-per-row: 5;
     --error-color: #933;
-    --button-color: #aaf;
-    --button-border-color: #339;
+    --button-color:  #beedc2;
+    --button-border-color: #393;
     --ok-color: #393;
 }
 
 body {
-    font-family: system-ui, -apple-system, blinkmacsystemfont, "Segoe UI", roboto, "Helvetica Neue", arial, sans-serif, "Segoe UI Emoji";
+    font-family: "Fanwood Text", serif;
 }
 
 .sidebar {
-    background-color: #f5f6fa;
+    background-color: var(--button-color);
     border-right: 1px solid #eeebee;    
 }
 
@@ -30,19 +30,27 @@ body {
 
 .sidebar header h1 {
     display: inline-block;
-    font-size: large;
+    font-size: x-large;
 }
 
 .sidebar header img {
     display: block;
-    width: 7em;
+    height: 5em;
 }
 
 @media (max-width: 48em) {
+    .sidebar header {
+        margin: 0.5em 0 0 2em;
+    }
+    
+    .sidebar header h1 {
+        margin: 0.1em;
+    }
     .sidebar header img {
         display: inline-block;
-        width: 4em;
-        vertical-align: sub;
+        max-height: 2em;
+        width: 3.2em;
+        vertical-align: text-bottom;
     }
 }
 
@@ -50,6 +58,11 @@ body {
     margin-left: 2em;
     
 }
+
+.sidebar .pure-menu-link {
+    color: #333;
+}
+
 @media (max-width: 48em) {
   /* HORIZONTAL MENU */
   .sidebar .pure-menu {
