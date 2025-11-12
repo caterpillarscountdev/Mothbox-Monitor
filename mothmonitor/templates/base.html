@@ -23,8 +23,10 @@
         <div class="pure-menu pure-menu-scrollable">
           <ul class="pure-menu-list">
             <li class="pure-menu-item"><a href="/dashboard" class="pure-menu-link">Dashboard</a></li>
+            {% if current_user.is_authenticated %}
             <li class="pure-menu-item"><a href="/" class="pure-menu-link">Devices</a></li>
             <li class="pure-menu-item"><a href="/" class="pure-menu-link">Datasets</a></li>
+            {% endif %}
           </ul>
         </div>
       </nav>
