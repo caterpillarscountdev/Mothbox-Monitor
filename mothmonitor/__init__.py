@@ -11,7 +11,6 @@ def create_app():
     app.config["SQLALCHEMY_DATABASE_URI"] = database.connection_string
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
-    app.config['SECURITY_PASSWORD_SALT'] = os.environ.get("SECURITY_PASSWORD_SALT", '146585145368132386173505678016728509634')
     app.config["REMEMBER_COOKIE_SAMESITE"] = "strict"
     app.config["SESSION_COOKIE_SAMESITE"] = "strict"
 
@@ -19,9 +18,10 @@ def create_app():
     auth.init_app(app)
 
 
-    from .blueprints import main, upload
+    from .blueprints import main, upload, devices
     
     app.register_blueprint(main.main)
     app.register_blueprint(upload.upload)
+    app.register_blueprint(devices.devices)
 
     return app

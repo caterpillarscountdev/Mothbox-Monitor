@@ -1,7 +1,25 @@
+{% set form %}user_row_{{ user.id}}{% endset%}
 <tr>
-  <td>{{ user.email }}</td>
-  <td>{{ user.active }}</td>
+  <td>
+    <form id="{{form}}">
+    </form>
+    <input form="{{form}}" type="text" name="email" value="{{ user.email }}" />
+  </td>
+  <td><input form="{{form}}" type="text" name="name" value="{{ user.name }}" /></td>
+  <td><input form="{{form}}" type="checkbox" name="active" {% if user.active %}checked{%endif%} /></td>
   <td>{{ user.last_login }}</td>
-  <td>{{ user.roles }}</td>
-  <td><button>Save</button></td>
+  <td>
+    <select form="{{form}}" name="roles" multiple size="3">
+      {% for role in roles %}
+        <option value="{{role.id}}" {% if role in user.roles %}selected{% endif %}>{{role.name}}</option>
+        {% endfor %}
+      </select>
+  </td>
+  <td>
+    <button hx-post="{{url_for('main.manage_users_edit', user_id=user.id)}}"
+            form="{{form}}"
+            hx-target="closest tr"
+            hx-swap="outerHTML"
+    >Save</button>
+  </td>
 </tr>
