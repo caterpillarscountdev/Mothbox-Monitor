@@ -1,0 +1,10 @@
+<tr>
+  <td>{{ device.name }}</td>
+  <td>{{ device.last_seen }}</td>
+  <td>{{ device.upload_key }}</td>
+  <td><button class="action"
+              hx-post="{{url_for('devices.create_key', device_id=device.id)}}"
+              hx-target="closest tr"
+              hx-swap="outerHTML"
+      >New Key</button></td>
+</tr>

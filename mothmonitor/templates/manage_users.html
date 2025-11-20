@@ -14,8 +14,8 @@
       <th>Roles</th>
       <th><button class="action"
                   hx-get="{{url_for('main.manage_users_edit')}}"
-                  hx-target="next tr"
-                  hx-swap="beforebegin"
+                  hx-target="next tbody"
+                  hx-swap="afterbegin"
           >Add</button></th>
     </tr>
   </thead>

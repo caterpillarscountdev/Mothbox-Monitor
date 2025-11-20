@@ -4,7 +4,23 @@
 
 {% block content %}
 <h2>Devices</h2>
-<button class="action">Create New Device Key</button>
 <table class="pure-table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Last Seen</th>
+      <th>Upload Key</th>
+      <th><button class="action"
+                  hx-post="{{url_for('devices.create_key')}}"
+                  hx-target="next tbody"
+                  hx-swap="afterbegin"
+          >New Key</button></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for device in devices %}
+    {% include "devices/hx/row.html" %}
+    {% endfor %}
+  </tbody>
 </table>
 {% endblock %}
