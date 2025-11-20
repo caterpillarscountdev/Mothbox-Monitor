@@ -102,6 +102,15 @@ body {
 }
 
 
+.action {
+    cursor: hand;
+    background-color: var(--button-color);
+    padding: 0.2em;
+    border: 1px solid var(--button-border-color);
+    border-radius: 0.5rem;
+}
+
+
 /* Forms */
 
 form fieldset {
@@ -175,4 +184,9 @@ ul.flashes li.error {
     color: white;
     list-style-type: none;
     background-color: var(--error-color);
+    width: max-content;
+}
+.fs-div label {
+    display: inline-block;
+    min-width: 8em;
 }

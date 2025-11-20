@@ -9,6 +9,7 @@ from alembic import op
 import sqlalchemy as sa
 
 from flask_security.utils import hash_password
+from mothmonitor.models import User
 
 
 # revision identifiers, used by Alembic.
@@ -19,18 +20,8 @@ depends_on = None
 
 
 def upgrade():
-    user = sa.sql.table(
-        'user',
-        sa.sql.column('id', sa.Integer),
-        sa.sql.column('active', sa.Boolean),
-        sa.sql.column('fs_uniquifier', sa.String),
-        sa.sql.column('email', sa.String),
-        sa.sql.column('name', sa.String),
-        sa.sql.column('password', sa.String),
-    )
-    
     op.bulk_insert(
-        user,
+        User.__table__,
         [
             {
                 'id': 1,
@@ -45,4 +36,4 @@ def upgrade():
     
 
 def downgrade():
-    op.execute("DELETE FROM user WHERE email = 'test@example.com")
+    op.execute("DELETE FROM user WHERE email = 'test@example.com'")

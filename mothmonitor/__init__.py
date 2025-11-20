@@ -19,8 +19,9 @@ def create_app():
     auth.init_app(app)
 
 
-    from .blueprints.main import main as main_blueprint
-
-    app.register_blueprint(main_blueprint)
+    from .blueprints import main, upload
+    
+    app.register_blueprint(main.main)
+    app.register_blueprint(upload.upload)
 
     return app

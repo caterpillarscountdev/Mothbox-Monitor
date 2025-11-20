@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Users{% endblock %}
+
+{% block content %}
+<h2>User List</h2>
+<table class="pure-table">
+  <thead>
+    <tr>
+      <th>Email</th>
+      <th>Active?</th>
+      <th>Last Login</th>
+      <th>Roles</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for user in users %}
+    <tr>
+      <td>{{ user.email }}</td>
+      <td>{{ user.active }}</td>
+      <td>{{ user.last_login }}</td>
+      <td>{{ user.roles|map(attribute="name")|join(", ") }}</td>
+      <td><div class="action"
+              hx-post="{{url_for('main.manage_users_edit', user_id=user.id)}}"
+              hx-target="closest tr"
+              hx-swap="outerHTML"
+          >&#x270E;</div></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

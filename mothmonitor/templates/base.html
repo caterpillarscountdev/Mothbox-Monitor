@@ -12,7 +12,6 @@
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/pure-min.css" integrity="sha384-X38yfunGUhNzHpBaEBsWLO+A0HDYOQi8ufWDkZ0k9e0eXz/tH3II7uKZ9msv++Ls" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/grids-responsive-min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/menus-min.css">
     <link rel="stylesheet" href="/static/css/style.css">
 
     <link href="https://fonts.googleapis.com/css?family=Fanwood+Text" rel="stylesheet">
@@ -36,10 +35,19 @@
         </header>
         <div class="pure-menu pure-menu-scrollable">
           <ul class="pure-menu-list">
-            <li class="pure-menu-item"><a href="/dashboard" class="pure-menu-link">Dashboard</a></li>
+            <li class="pure-menu-header">Home</li>
             {% if current_user.is_authenticated %}
-            <li class="pure-menu-item"><a href="/" class="pure-menu-link">Devices</a></li>
-            <li class="pure-menu-item"><a href="/" class="pure-menu-link">Datasets</a></li>
+            <li class="pure-menu-item"><a href="{{ url_for('main.dashboard') }}" class="pure-menu-link">Dashboard</a></li>
+            <li class="pure-menu-header">Monitor</li>
+            <li class="pure-menu-item"><a href="{{ url_for('main.index') }}" class="pure-menu-link">Devices</a></li>
+            <li class="pure-menu-item"><a href="{{ url_for('main.index') }}" class="pure-menu-link">Datasets</a></li>
+            <li class="pure-menu-header">Account</li>
+            <li class="pure-menu-item"><a href="{{ url_for('main.manage_users') }}" class="pure-menu-link">Manage Users</a></li>
+            <li class="pure-menu-item"><a href="{{ url_for('security.change_email') }}" class="pure-menu-link">Change Email</a></li>
+            <li class="pure-menu-item"><a href="{{ url_for('security.change_password') }}" class="pure-menu-link">Change Password</a></li>
+            <li class="pure-menu-item"><a href="{{ url_for('security.logout') }}" class="pure-menu-link">Logout</a></li>
+            {% else %}
+            <li class="pure-menu-item"><a href="{{ url_for('security.login') }}" class="pure-menu-link">Login</a></li>
             {% endif %}
           </ul>
         </div>
@@ -58,7 +66,6 @@
         {% block content %}
 
         {% endblock %}
-      </main>
       </main>
     </div>
     {% block scripts %}
