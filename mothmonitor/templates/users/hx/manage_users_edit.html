@@ -16,7 +16,7 @@
       </select>
   </td>
   <td>
-    <button hx-post="{{url_for('main.manage_users_edit', user_id=user.id)}}"
+    <button hx-post="{{url_for('users.manage_users_edit', user_id=user.id)}}"
             form="{{form}}"
             hx-target="closest tr"
             hx-swap="outerHTML"

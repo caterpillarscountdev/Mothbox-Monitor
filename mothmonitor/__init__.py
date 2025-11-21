@@ -18,9 +18,10 @@ def create_app():
     auth.init_app(app)
 
 
-    from .blueprints import main, upload, devices
+    from .blueprints import main, users, upload, devices
     
     app.register_blueprint(main.main)
+    app.register_blueprint(users.users, url_prefix="/users")
     app.register_blueprint(upload.upload)
     app.register_blueprint(devices.devices)
 

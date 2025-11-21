@@ -5,7 +5,7 @@
   <td>{{ user.last_login }}</td>
   <td>{{ user.roles|map(attribute="name")|join(", ") }}</td>
   <td><button class="action"
-           hx-get="{{url_for('main.manage_users_edit', user_id=user.id)}}"
+           hx-get="{{url_for('users.manage_users_edit', user_id=user.id)}}"
            hx-target="closest tr"
            hx-swap="outerHTML"
       >&#x270E;</button></td>
