@@ -108,6 +108,7 @@ body {
     padding: 0.2em;
     border: 1px solid var(--button-border-color);
     border-radius: 0.5rem;
+    min-width: 1.5em;
 }
 
 

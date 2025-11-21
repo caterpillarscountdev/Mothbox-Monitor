@@ -1,3 +1,5 @@
+import uuid
+
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_security import auth_required
 from ..models import db, User, Role
@@ -34,7 +36,10 @@ def manage_users_edit(user_id):
         user.name = request.form.get('name')
         user.email = request.form.get('email')
         user.active = request.form.get('active', False) and True
+        rids = {r.id: r for r in roles}
+        user.roles = [rids[int(x)] for x in request.form.getlist('roles')]
         if not user_id:
+            user.fs_uniquifier = uuid.uuid4().hex 
             db.session.add(user)
         db.session.commit()
         return render_template("hx/manage_users_row.html", **locals())
