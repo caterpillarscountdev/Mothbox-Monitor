@@ -137,7 +137,7 @@ form dd {
     padding-right: 2rem;
 }
 
-form .save, form input[type=submit], button {
+form .save, form input[type=submit], form input[type=file], button {
     background-color: var(--button-color);
     padding: 0.5rem;
     border: 1px solid var(--button-border-color);
@@ -190,4 +190,34 @@ ul.flashes li.error {
 .fs-div label {
     display: inline-block;
     min-width: 8em;
+}
+
+/* Upload */
+
+.upload-container {
+    width: max-content;
+}
+
+
+.upload-validate {
+    margin-top: 0.5em;
+}
+
+.upload-validate label {
+    display: inline-block;
+    min-width: 4em;
+}
+
+.upload-container progress {
+    padding: 0.5em;
+    vertical-align: middle;
+}
+
+.hidden {
+    display: none;
+}
+
+.spinner {
+    height: 1em;
+    padding-left: 0.5em;
 }

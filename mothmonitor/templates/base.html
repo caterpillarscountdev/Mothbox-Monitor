@@ -1,3 +1,7 @@
+{% macro indicator() %}
+<img class="htmx-indicator" src="/static/images/spinner-oval.svg" alt="Loading...">
+{% endmacro %}
+
 {% block doc -%}
 <!DOCTYPE html>
 <html{% block html_attribs %}{% endblock html_attribs %}>
@@ -37,7 +41,7 @@
           <ul class="pure-menu-list">
             <li class="pure-menu-header">Home</li>
             {% if current_user.is_authenticated %}
-            <li class="pure-menu-item"><a href="{{ url_for('main.dashboard') }}" class="pure-menu-link">Dashboard</a></li>
+            <li class="pure-menu-item"><a href="{{ url_for('main.index') }}" class="pure-menu-link">Dashboard</a></li>
             <li class="pure-menu-header">Monitor</li>
             <li class="pure-menu-item"><a href="{{ url_for('devices.list') }}" class="pure-menu-link">Devices</a></li>
             <li class="pure-menu-item"><a href="{{ url_for('main.index') }}" class="pure-menu-link">Datasets</a></li>

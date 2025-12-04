@@ -2,6 +2,47 @@
 
 {% block title %}Home{% endblock %}
 
+{% block head_scripts %}
+<script type="module" src="/static/js/upload.js"></script>
+{% endblock %}
+
 {% block content %}
-Welcome to Moth Monitor Management
+<h2>Welcome to Moth Monitor Management</h2>
+
+
+<div class="upload-container">
+  <form>
+    <fieldset>
+      <label>Upload a Dataset</label>
+      <p>1. Select a Nightly Folder</p>
+      <input class="upload-dir" id="uploadDir" type="file" webkitdirectory multiple />
+      <div class="upload-validate hidden">
+        <p>2. Confirm selection</p>
+        <ul class="flashes">
+        </ul>
+        <div>
+          <label for="deviceName">Device:</label><input id="deviceName" type="text" />
+        </div>
+        <div>
+          <label for="night">Night:</label><input id="night" type="text" />
+        </div>
+        <p>Does this look right?</p>
+        <button class="upload-start">Start Upload<img class="spinner hidden" src="/static/images/spinner-oval.svg" alt="Loading..."></button>
+      </div>
+      <div class="upload-manifest hidden">
+        <p>3. Checking upload storage</p>
+        <ul class="flashes">
+        </ul>
+      </div>
+      <div class="upload-progress hidden">
+        <p>4. Upload in progress</p>
+        <progress id="upload_progress" max="100" value="0"></progress>
+        <label for="upload_progress"><span id="remainingFiles">0</span>/<span id="neededFiles">0</span></label>
+      </div>
+      <div class="upload-finished hidden">
+        <p>5. Upload complete.</p>
+      </div>
+    </fieldset>
+  </form>
+</div>
 {% endblock %}

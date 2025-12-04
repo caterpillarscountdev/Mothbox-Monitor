@@ -14,6 +14,9 @@ def create_app():
     app.config["REMEMBER_COOKIE_SAMESITE"] = "strict"
     app.config["SESSION_COOKIE_SAMESITE"] = "strict"
 
+    app.config["S3_BUCKET"] = os.environ.get("S3_BUCKET", "")
+    # Also expects AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY in environ
+
     database.init_app(app)
     auth.init_app(app)
 
@@ -22,7 +25,7 @@ def create_app():
     
     app.register_blueprint(main.main)
     app.register_blueprint(users.users, url_prefix="/users")
-    app.register_blueprint(upload.upload)
+    app.register_blueprint(upload.upload, url_prefix="/upload")
     app.register_blueprint(devices.devices)
 
     return app
