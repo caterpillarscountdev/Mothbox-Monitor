@@ -14,11 +14,16 @@ def s3_prefix(device, night):
     return os.path.join(device, night)
 
 
+@upload.route('/')
+@auth_required()
+def index():
+    return render_template('upload/index.html')
+
 @upload.route('/check_manifest', methods=["POST"])
 @auth_required()
 def check_manifest():
     # TODO: Validate key
-    key = request.args.get('key')
+    device_key = request.args.get('key')
 
     S3_BUCKET = current_app.config['S3_BUCKET']
     S3_LOCATION = 'https://{}.s3.amazonaws.com/'.format(S3_BUCKET)
@@ -53,11 +58,11 @@ def check_manifest():
         filename, missing = check_key(f["filename"], f["size"])
         url["location"] = f"{S3_LOCATION}{filename}"
         if missing:
-            url["upload_url"] = create_upload_key(s3, S3_BUCKET, f["file"], f["type"])
-        result.append({
+            url["upload_url"] = create_upload_url(s3, S3_BUCKET, f["filename"], f["type"])
+        result["files"].append({
             "filename": filename,
             "missing": missing
-        }.update(url))
+        }|url)
             
     return result
 
@@ -66,8 +71,8 @@ def create_upload_url(s3, bucket, file_name, file_type):
     return s3.generate_presigned_url(
         "put_object",
         Params = {
-            "Bucket": S3_BUCKET,
-            "Key": file_name,
-            "Expiration": 3600
-        }
+            "Bucket": bucket,
+            "Key": file_name
+        },
+        ExpiresIn=3600
     )    

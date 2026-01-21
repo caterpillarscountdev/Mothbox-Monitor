@@ -106,49 +106,55 @@ async function upload_start(ev) {
   let files = document.getElementById("uploadDir").files;
   
   let manifest = build_manifest(device, night, files);
+  ev.target.disabled = true;
+  try {
+    let resp = await fetch("/upload/check_manifest", {
+      method: "POST",
+      body: JSON.stringify(manifest),
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
 
-  
-  let resp = await fetch("/upload/check_manifest", {
-    method: "POST",
-    body: JSON.stringify(manifest),
-    headers: {
-      "Content-Type": "application/json"
+    spinner.classList.add("hidden");
+    show("manifest")
+
+    let body = await resp.json()
+
+    let needed = body.files.filter(x => x["missing"])
+    let previous = body.files.length-needed.length
+    console.log("needed", needed, "previous", previous)
+    let msg = needed.length+" new files to upload. ";
+    if (previous > 0) {
+      msg += previous+" previously uploaded.";
     }
-  })
+    show_step_message("manifest", "ok", msg)
 
-  spinner.classList.add("hidden");
-  show("manifest")
+    let progress = document.getElementById("upload_progress");
+    let remainingEl = document.getElementById("remainingFiles");
+    let neededEl = document.getElementById("neededFiles");
 
-  let body = await resp.json()
+    let count = needed.length;
+    let up = 0;
 
-  let needed = body.files.filter(x => x["missing"])
-  let previous = body.files.length-needed.length
-  let msg = needed.length+" new files to upload. ";
-  if (previous > 0) {
-    msg += previous+" previously uploaded.";
+    neededEl.textContent = count;
+    progress.max = count;
+
+    show("progress")
+
+    for (let f of needed) {
+      // upload to S3 url
+      await new Promise(r => setTimeout(r, 2000));
+      up++;
+      remainingEl.textContent = up;
+      progress.value = up;
+    }
   }
-  show_step_message("manifest", "ok", msg)
-
-  let progress = document.getElementById("upload_progress");
-  let remainingEl = document.getElementById("remainingFiles");
-  let neededEl = document.getElementById("neededFiles");
-
-  let count = needed.length;
-  let up = 0;
-
-  neededEl.textContent = count;
-  progress.max = count;
-
-  show("progress")
-
-  for (let f of needed) {
-    // upload to S3 url
-    await new Promise(r => setTimeout(r, 2000));
-    up++;
-    remainingEl.textContent = up;
-    progress.value = up;
+  catch(e) {
+    ev.target.disabled = false;
+    throw(e)
   }
-
+    
   show("finished")
   
   
@@ -161,6 +167,9 @@ function reset() {
   for (let el of document.querySelectorAll(".upload-validate ul, .upload-progress ul")) {
     el.replaceChildren();
   }
+  document.querySelectorAll(".upload-start").forEach((x) => {
+    x.disabled = false;
+  })
   document.getElementById("deviceName").value = "";
   document.getElementById("night").value = "";
   
