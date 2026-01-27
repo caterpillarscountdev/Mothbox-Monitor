@@ -56,26 +56,25 @@ def check_manifest():
 
     prefix = s3_prefix(device, night)
     
-    def check_key(filename, size):
-        key = f"{prefix}{filename}"
-        print(prefix, filename, size)
-        return filename, True
+    def check_key(filename, key, size):
+        key = f"{prefix}/{filename}"
         try:
             head = s3.head_object(Bucket=S3_BUCKET, Key=key)
-            return filename, (head["ContentLength"] == size)
+            return filename, (head["ContentLength"] != size)
         except s3.exceptions.ClientError as e:
             if e.response['Error']['Code'] == '404':
-                return filename, False
+                return filename, True
             else:
                 raise
 
     result = {"files": []}
     for f in files:
         url = {}
-        filename, missing = check_key(f["filename"], f["size"])
-        url["location"] = f"{S3_LOCATION}{filename}"
+        key = f"{prefix}/{f["filename"]}"
+        filename, missing = check_key(f["filename"], key, f["size"])
+        url["location"] = f"{S3_LOCATION}{key}"
         if missing:
-            url["upload_url"] = create_upload_url(s3, S3_BUCKET, f["filename"], f["type"])
+            url["upload_url"] = create_upload_url(s3, S3_BUCKET, key, f["type"])
         result["files"].append({
             "filename": filename,
             "missing": missing
