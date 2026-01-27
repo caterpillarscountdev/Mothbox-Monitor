@@ -1,5 +1,6 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
-from flask_security import auth_required
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, abort
+from flask_security import auth_required, current_user
+from flask_cors import cross_origin
 
 import os
 import boto3, botocore
@@ -14,16 +15,32 @@ def s3_prefix(device, night):
     return os.path.join(device, night)
 
 
+def _check_device_key(key):
+    return db.session.execute(db.select(Device).where(Device.upload_key==key)).first()
+        
+
+
 @upload.route('/')
 @auth_required()
 def index():
     return render_template('upload/index.html')
 
-@upload.route('/check_manifest', methods=["POST"])
-@auth_required()
-def check_manifest():
-    # TODO: Validate key
+@upload.route('/check_key')
+@cross_origin()
+def check_key():
     device_key = request.args.get('key')
+    if not _check_device_key(device_key):
+        abort(401)
+    return "ok"
+    
+
+@upload.route('/check_manifest', methods=["POST"])
+@cross_origin()
+def check_manifest():
+
+    device_key = request.args.get('key')
+    if not (current_user.is_authenticated or _check_device_key(device_key)):
+        abort(401)
 
     S3_BUCKET = current_app.config['S3_BUCKET']
     S3_LOCATION = 'https://{}.s3.amazonaws.com/'.format(S3_BUCKET)
