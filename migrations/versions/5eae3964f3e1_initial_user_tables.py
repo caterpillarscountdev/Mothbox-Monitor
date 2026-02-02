@@ -25,7 +25,7 @@ def upgrade():
     sa.Column('name', sa.String(length=80), nullable=False),
     sa.Column('description', sa.String(length=255), nullable=True),
     sa.Column('permissions', flask_security.datastore.AsaList(), nullable=True),
-    sa.Column('update_datetime', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
+    sa.Column('update_datetime', sa.DateTime(), server_default=sa.func.current_timestamp(), nullable=False),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_role')),
     sa.UniqueConstraint('name', name=op.f('uq_role_name'))
     )
@@ -50,8 +50,8 @@ def upgrade():
     sa.Column('tf_primary_method', sa.String(length=64), nullable=True),
     sa.Column('tf_totp_secret', sa.String(length=255), nullable=True),
     sa.Column('tf_phone_number', sa.String(length=128), nullable=True),
-    sa.Column('create_datetime', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
-    sa.Column('update_datetime', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
+    sa.Column('create_datetime', sa.DateTime(), server_default=sa.func.current_timestamp(), nullable=False),
+    sa.Column('update_datetime', sa.DateTime(), server_default=sa.func.current_timestamp(), nullable=False),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_user')),
     sa.UniqueConstraint('email', name=op.f('uq_user_email')),
     sa.UniqueConstraint('fs_uniquifier', name=op.f('uq_user_fs_uniquifier')),
