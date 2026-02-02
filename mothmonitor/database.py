@@ -1,5 +1,5 @@
 import os
-from sqlalchemy import MetaData
+from sqlalchemy import MetaData, String, VARCHAR
 from sqlalchemy.orm import DeclarativeBase
 
 from flask_sqlalchemy import SQLAlchemy
@@ -26,6 +26,11 @@ class ModelBase(DeclarativeBase):
     metadata = MetaData(naming_convention=convention)
 
 db = SQLAlchemy(model_class=ModelBase)
+db.Model.registry.update_type_annotation_map({
+        str: String()
+        # add a default VARCHAR length for MySQL
+        .with_variant(VARCHAR(255), "mysql")
+    })
 
 migrate = Migrate()
 
