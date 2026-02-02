@@ -1,4 +1,6 @@
 FROM python:3.13-slim
+RUN apt-get -y update && apt-get -y install python3-dev default-libmysqlclient-dev build-essential pkg-config
+
 COPY requirements.txt /
 RUN pip3 install --upgrade pip
 RUN pip3 install -r requirements.txt

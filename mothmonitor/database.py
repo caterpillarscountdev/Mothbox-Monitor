@@ -5,8 +5,14 @@ from sqlalchemy.orm import DeclarativeBase
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
-
 connection_string = os.environ.get("DATABASE_URI", "sqlite:///db.sqlite")
+if os.environ.get("DATABASE_USER"):
+    USER = os.environ.get("DATABASE_USER")
+    PASS = os.environ.get("DATABASE_PASSWORD")
+    HOST = os.environ.get("DEVCCDB_SERVICE_HOST")
+    DB = os.environ.get("DATABASE_NAME")
+    connection_string = f"mysql+mysqldb://{USER}:{PASS}@{HOST}/{DB}"
+    
 
 convention = {
     "ix": 'ix_%(column_0_label)s',
