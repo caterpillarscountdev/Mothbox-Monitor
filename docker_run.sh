@@ -1,4 +1,4 @@
 #!/bin/bash
 
-flask db upgrade
+flask --app mothbox db upgrade
 gunicorn --config gunicorn_config.py 'mothmonitor:create_app()'
