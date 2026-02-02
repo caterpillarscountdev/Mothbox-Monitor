@@ -8,4 +8,4 @@ WORKDIR /app
 
 EXPOSE 8080
 
-CMD ["gunicorn","--config", "gunicorn_config.py", "mothmonitor:create_app()"]
+ENTRYPOINT ["./docker_run.sh"]
