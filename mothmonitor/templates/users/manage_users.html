@@ -4,13 +4,12 @@
 
 {% block content %}
 <h2>User List</h2>
-<table class="pure-table">
+<table class="pure-table pure-table-horizontal">
   <thead>
     <tr>
       <th>Email</th>
       <th>Name</th>
       <th>Active?</th>
-      <th>Last Login</th>
       <th>Roles</th>
       <th><button class="action"
                   hx-get="{{url_for('users.manage_users_edit')}}"

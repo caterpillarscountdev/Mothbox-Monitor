@@ -1,3 +1,7 @@
+def test_user_access(client):
+    res = client.get('/users/manage')
+    assert res.status_code == 403
+
 
 def test_user_manage(admin_client):
     res = admin_client.get('/users/manage')

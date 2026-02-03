@@ -1,22 +1,22 @@
 import uuid
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from flask_security import auth_required
+from flask_security import permissions_required, current_user
 from ..models import db, User, Role
 
 users = Blueprint('users', __name__)
 
 @users.route('/manage')
-@auth_required()
+@permissions_required("admin")
 def manage_users():
-    
+    print("current user", current_user)
     users = db.session.execute(db.select(User).order_by(User.id)).scalars()
     return render_template("users/manage_users.html", **locals())
 
 
 @users.route('/manage/edit/', methods=["GET", "POST"], defaults={"user_id": None})
 @users.route('/manage/edit/<user_id>', methods=["GET", "POST"])
-@auth_required()
+@permissions_required("admin")
 def manage_users_edit(user_id):
     user = User(name="", email="", active=True)
     if user_id:

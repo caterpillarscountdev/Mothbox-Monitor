@@ -2,7 +2,6 @@
   <td>{{ user.email }}</td>
   <td>{{ user.name }}</td>
   <td>{{ user.active }}</td>
-  <td>{{ user.last_login }}</td>
   <td>{{ user.roles|map(attribute="name")|join(", ") }}</td>
   <td><button class="action"
            hx-get="{{url_for('users.manage_users_edit', user_id=user.id)}}"

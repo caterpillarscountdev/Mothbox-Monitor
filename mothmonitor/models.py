@@ -15,6 +15,12 @@ fsqla.FsModels.set_db_info(db)
 class User(db.Model, fsqla.FsUserMixin):
     name: Mapped[str] = mapped_column(index=True, nullable=True)
 
+    def can(self, perm):
+        for role in self.roles:
+            if perm in role.permissions:
+                return True
+        return False
+
 class Role(db.Model, fsqla.FsRoleMixin):
     pass
 
@@ -34,3 +40,4 @@ class Device(db.Model):
             self.former_keys = ",".join(keys)
         self.upload_key = secrets.token_hex(16)
         return self.upload_key
+

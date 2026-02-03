@@ -46,14 +46,19 @@
             <li class="pure-menu-header">Monitor</li>
             <li class="pure-menu-item"><a href="{{ url_for('upload.index')}}" class="pure-menu-link">Upload</a></li>
             <li class="pure-menu-item"><a href="{{ url_for('devices.list') }}" class="pure-menu-link">Devices</a></li>
+            {% if current_user.can("research") %}
             <li class="pure-menu-item"><a href="{{ url_for('main.index') }}" class="pure-menu-link">Datasets</a></li>
-            <li class="pure-menu-header">Account</li>
+            {% endif %}
+            <li class="pure-menu-header">Account <em> - {{current_user.email}}</em></li>
+            {% if current_user.can("admin") %}
             <li class="pure-menu-item"><a href="{{ url_for('users.manage_users') }}" class="pure-menu-link">Manage Users</a></li>
+            {% endif %}
             <li class="pure-menu-item"><a href="{{ url_for('security.change_email') }}" class="pure-menu-link">Change Email</a></li>
             <li class="pure-menu-item"><a href="{{ url_for('security.change_password') }}" class="pure-menu-link">Change Password</a></li>
             <li class="pure-menu-item"><a href="{{ url_for('security.logout') }}" class="pure-menu-link">Logout</a></li>
             {% else %}
             <li class="pure-menu-item"><a href="{{ url_for('security.login') }}" class="pure-menu-link">Login</a></li>
+            <li class="pure-menu-item"><a href="{{ url_for('security.forgot_password') }}" class="pure-menu-link">Forgot Login?</a></li>
             {% endif %}
           </ul>
         </div>
@@ -61,7 +66,7 @@
       <main class="content pure-u-1 pure-u-md-3-4">
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-        <ul class=flashes>
+        <ul class="flashes">
           {% for category, message in messages %}
           <li class="{{category}}">{{ message }}</li>
           {% endfor %}

@@ -2,7 +2,7 @@ import pytest
 from mothmonitor import create_app, models, database
 from flask_login import FlaskLoginClient
 
-@pytest.fixture(scope="session")
+@pytest.fixture()
 def app():
     database.connection_string = "sqlite:///:memory:"
     app = create_app()
@@ -18,6 +18,9 @@ def app():
 
     with app.app_context():
         database.db.create_all()
+        database.db.session.add(models.Role(name="Admin", description="Admin", permissions=["admin", "research", "site"]))
+        database.db.session.add(models.Role(name="Site", description="Site", permissions=["admin", "site"]))
+        database.db.session.commit()
         yield app
         database.db.drop_all()
 
@@ -26,10 +29,11 @@ def client(app):
     return app.test_client()
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture()
 def admin_user(app):
     with app.app_context():
-        u = models.User(name='Test Test', email="test2@example.com", password="test", fs_uniquifier="2", active=True)
+        admin = database.db.session.execute(database.db.select(models.Role).where(models.Role.name=="Admin")).first()[0]
+        u = models.User(name='Test Test', email="test2@example.com", password="test", fs_uniquifier="2", active=True, roles=[admin])
         database.db.session.add(u)
         database.db.session.commit()
         yield u
