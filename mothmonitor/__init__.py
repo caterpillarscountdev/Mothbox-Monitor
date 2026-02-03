@@ -18,7 +18,8 @@ def create_app():
     app.config["S3_BUCKET"] = os.environ.get("S3_BUCKET", "")
     # Also expects AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY in environ
     #
-    app.config["MAIL_DEFAULT_SENDER"] = 'lopp+mothmonitor@unc.edu'
+    app.config["MAIL_SERVER"] = os.environ.get("MAIL_SERVER", "relay.unc.edu")
+    app.config["MAIL_DEFAULT_SENDER"] = os.environ.get("MAIL_DEFAULT_SENDER", 'lopp+mothmonitor@unc.edu')
 
     mail = Mail(app)
     database.init_app(app)
