@@ -4,6 +4,7 @@ from flask_cors import cross_origin
 
 import os
 import boto3, botocore
+from datetime import datetime
 
 from ..models import db, Device
 
@@ -16,7 +17,7 @@ def s3_prefix(device, night):
 
 
 def _check_device_key(key):
-    return db.session.execute(db.select(Device).where(Device.upload_key==key)).first()
+    return db.session.scalars(db.select(Device).where(Device.upload_key==key)).first()
         
 
 
@@ -39,7 +40,8 @@ def check_key():
 def check_manifest():
 
     device_key = request.args.get('key')
-    if not (current_user.is_authenticated or _check_device_key(device_key)):
+    valid_device = _check_device_key(device_key)
+    if not (current_user.is_authenticated or valid_device):
         abort(401)
 
     S3_BUCKET = current_app.config['S3_BUCKET']
@@ -55,7 +57,21 @@ def check_manifest():
     # files = [{"filename": "", "size": 0, "type": "image/jpeg"}]
 
     prefix = s3_prefix(device, night)
-    
+    seen = datetime.now()
+
+    # Ensure a device record exists for this upload
+    if valid_device and (valid_device.name == '' or valid_device.name == device):
+        valid_device.name = device
+        valid_device.last_seen = seen
+    else:
+        d = db.session.scalars(db.select(Device).where(Device.name==device)).first()
+        if d:
+            d.last_seen = seen
+        if not d:
+            d = Device(name=device, last_seen=seen)
+            db.session.add(d)
+    db.session.flush()
+
     def check_key(filename, key, size):
         key = f"{prefix}/{filename}"
         try:

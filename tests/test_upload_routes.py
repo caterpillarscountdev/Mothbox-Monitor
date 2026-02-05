@@ -1,3 +1,4 @@
+from mothmonitor.models import Device, db
 
 def test_check_key_cors(client):
     res = client.options('/upload/check_key')
@@ -23,14 +24,37 @@ def test_check_manifest_user(admin_client):
         "files": []
     })
     assert res.status_code == 200
+
+def test_check_manifest_user_creates_device(admin_client):
+    assert db.session.scalars(db.select(Device).where(Device.name=='testDevice')).first() == None
+    res = admin_client.post('/upload/check_manifest?', json={
+        "deviceName": "testDevice",
+        "night": "2026-01-01",
+        "files": []
+    })
+    assert res.status_code == 200
+    d = db.session.scalars(db.select(Device).where(Device.name=='testDevice')).first()
+    assert d.name == 'testDevice'
+
     
-def test_check_manifest(client, device):
+def test_check_manifest_key(client, device):
     res = client.post('/upload/check_manifest?key='+device.upload_key, json={
         "deviceName": "testDevice",
         "night": "2026-01-01",
         "files": []
     })
     assert res.status_code == 200
+
+def test_check_manifest_key_sets_name(client, device):
+    assert device.name == ''
+    res = client.post('/upload/check_manifest?key='+device.upload_key, json={
+        "deviceName": "testDevice",
+        "night": "2026-01-01",
+        "files": []
+    })
+    assert res.status_code == 200
+
+    assert device.name == 'testDevice'
     
 
 def test_check_manifest_existing_file(client, device, mocker):
