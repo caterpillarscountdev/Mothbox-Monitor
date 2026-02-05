@@ -32,7 +32,7 @@ def client(app):
 @pytest.fixture()
 def admin_user(app):
     with app.app_context():
-        admin = database.db.session.execute(database.db.select(models.Role).where(models.Role.name=="Admin")).first()[0]
+        admin = database.db.session.scalars(database.db.select(models.Role).where(models.Role.name=="Admin")).first()
         u = models.User(name='Test Test', email="test2@example.com", password="test", fs_uniquifier="2", active=True, roles=[admin])
         database.db.session.add(u)
         database.db.session.commit()
@@ -45,7 +45,7 @@ def admin_client(admin_user, app):
 @pytest.fixture()
 def device(app):
     with app.app_context():
-        d = models.Device(name="Test Device")
+        d = models.Device(name="")
         d.generate_upload_key()
         database.db.session.add(d)
         database.db.session.commit()

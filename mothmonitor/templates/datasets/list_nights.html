@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Data Collection Nights{% endblock %}
+
+{% block content %}
+<h2>Data Collection Nights</h2>
+<table class="pure-table pure-table-horizontal">
+  <thead>
+    <tr>
+      <th>Device</th>
+      <th>Night</th>
+      <th>Details</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% set previous = namespace(device=None) %}
+    {% for night in nights %}
+    <tr>
+      <td>{% if night.device != previous.device %}{{night.device}}{% endif %}</td>
+      <td>{{night.night}}</td>
+      <td></td>
+    </tr>
+    {% set previous.device = night.device %}
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}
