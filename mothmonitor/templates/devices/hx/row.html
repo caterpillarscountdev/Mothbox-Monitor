@@ -1,7 +1,7 @@
 <tr>
   <td>{{ device.name }}</td>
-  <td>{{ device.label }}</td>
-  <td>{{ device.last_seen }}</td>
+  <td>{{ device.label or ""}}</td>
+  <td>{{ device.last_seen|format_datetime("datetime") }}</td>
   <td>{{ device.upload_key }}</td>
   <td><button class="action"
               hx-get="{{url_for('devices.device_edit', device_id=device.id)}}"

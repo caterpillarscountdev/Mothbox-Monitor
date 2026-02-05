@@ -34,4 +34,14 @@ def create_app():
     app.register_blueprint(devices.devices, url_prefix="/devices")
     app.register_blueprint(datasets.datasets, url_prefix="/datasets")
 
+    @app.template_filter()
+    def format_datetime(value, format='date'):
+        if not value:
+            return ""
+        if format == 'date':
+            format="%b %d, %Y"
+        elif format == 'datetime':
+            format="%b %d, %Y %I:%M %p"
+        return value.strftime(format)
+    
     return app
