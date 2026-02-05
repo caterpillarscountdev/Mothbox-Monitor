@@ -70,7 +70,7 @@ def check_manifest():
         if not d:
             d = Device(name=device, last_seen=seen)
             db.session.add(d)
-    db.session.flush()
+    db.session.commit()
 
     def check_key(filename, key, size):
         key = f"{prefix}/{filename}"
