@@ -6,6 +6,7 @@ from sqlalchemy.orm import joinedload
 import boto3
 from botocore.exceptions import ClientError
 import dateutil
+import mimetypes
 
 
 datasets = Blueprint('datasets', __name__)
@@ -13,28 +14,40 @@ datasets = Blueprint('datasets', __name__)
 
 DELIM = "/"
 
-def s3_result_prefixes(result, prefix=""):
-    prefixes = [f['Prefix'][:-1].replace(prefix, "") for f in result['CommonPrefixes']]
-    return prefixes
 
-def get_s3_devices(s3):
-    S3_BUCKET = current_app.config['S3_BUCKET']
-    result = s3.list_objects(Bucket=S3_BUCKET, Delimiter=DELIM)
-    return s3_result_prefixes(result)
+class S3Reader:
+    def __init__(self, s3):
+        self.s3 = s3
+    
+    def result_prefixes(self, result, prefix=""):
+        prefixes = [f['Prefix'][:-1].replace(prefix, "") for f in result['CommonPrefixes']]
+        return prefixes
 
-def get_s3_device_nights(s3, device):
-    S3_BUCKET = current_app.config['S3_BUCKET']
-    prefix = f'{device}{DELIM}'
-    result = s3.list_objects(Bucket=S3_BUCKET, Delimiter=DELIM,
-                             Prefix=prefix)
-    return s3_result_prefixes(result, prefix=prefix)
+    def result_file_contents(self, result):
+        return [{"filename": f["Key"],
+                 "size": f["Size"],
+                 "type": mimetypes.guess_type(f["Key"])[0],
+                 "lastModified": f["LastModified"]
+                 }
+                for f in result["Contents"]]
 
-def get_s3_night_files(s3, device, night):
-    S3_BUCKET = current_app.config['S3_BUCKET']
-    result = s3.list_objects(Bucket=S3_BUCKET, Delimiter=DELIM,
-                             Prefix=f'{device_name}{DELIM}')
-    print(result)
-    return s3_result_prefixes(result)
+    def get_devices(self):
+        S3_BUCKET = current_app.config['S3_BUCKET']
+        result = self.s3.list_objects(Bucket=S3_BUCKET, Delimiter=DELIM)
+        return self.result_prefixes(result)
+
+    def get_device_nights(self, device):
+        S3_BUCKET = current_app.config['S3_BUCKET']
+        prefix = f'{device}{DELIM}'
+        result = self.s3.list_objects(Bucket=S3_BUCKET, Delimiter=DELIM,
+                                 Prefix=prefix)
+        return self.result_prefixes(result, prefix=prefix)
+
+    def get_night_files(self, device_name, night_name):
+        S3_BUCKET = current_app.config['S3_BUCKET']
+        result = self.s3.list_objects(Bucket=S3_BUCKET, Delimiter=DELIM,
+                                 Prefix=f'{device_name}{DELIM}{night_name}{DELIM}')
+        return self.result_file_contents(result)
 
 
 
@@ -51,17 +64,29 @@ def list_nights():
 def refresh_nights_s3():
     nights = []
 
-    s3 = boto3.client("s3")
-
+    s3 = S3Reader(boto3.client("s3"))
+    db.session.query(Night).delete()
+    db.session.query(Device).delete()
+    db.session.commit()
     try:
-        devices = get_s3_devices(s3)
+        devices = s3.get_devices()
         for device_name in sorted(devices):
             device = db.get_or_create(Device, name=device_name)
-            n = get_s3_device_nights(s3, device_name)
+            n = s3.get_device_nights(device_name)
             for night_name in sorted(n, reverse=True):
+                files = s3.get_night_files(device_name, night_name)
+                photo_count = len([f for f in files if f["type"] == 'image/jpeg'])
+                last_modified = max(f["lastModified"] for f in files)
                 night_date = dateutil.parser.parse(night_name).date()
-                night = db.get_or_create(Night, night=night_date, device_id=device.id)
+                night = db.get_or_create(Night,
+                                         night=night_date,
+                                         device_id=device.id)
+                
+                night.photo_count=photo_count
+                night.last_modified=last_modified
+                
                 nights.append(night)
+        db.session.commit()
     except ClientError as e:
         print(f'S3 Error: {e}')
         flash(e, "error")

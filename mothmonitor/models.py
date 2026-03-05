@@ -30,6 +30,7 @@ class Night(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     night: Mapped[datetime.date] = mapped_column(index=True, nullable=True)
     uploaded_started_at: Mapped[datetime.datetime] = mapped_column(nullable=True)
+    last_modified: Mapped[datetime.datetime] = mapped_column(nullable=True)
     photo_count: Mapped[int] = mapped_column(nullable=True)
     
     device_id: Mapped[int] = mapped_column(ForeignKey("device.id"))
