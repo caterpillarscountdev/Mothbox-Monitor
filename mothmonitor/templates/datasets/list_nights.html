@@ -10,7 +10,8 @@
     <tr>
       <th>Device</th>
       <th>Night</th>
-      <th>Details</th>
+      <th>Photos</th>
+      <th>Upload Date</th>
     </tr>
   </thead>
   <tbody>
@@ -19,7 +20,8 @@
     <tr>
       <td>{% if night.device != previous.device %}{{night.device.label or night.device.name}}{% endif %}</td>
       <td>{{night.night}}</td>
-      <td></td>
+      <td>{{night.photo_count}}</td>
+      <td>{{night.last_modified|format_datetime("datetime")}}</td>
     </tr>
     {% set previous.device = night.device %}
     {% endfor %}
