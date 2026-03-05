@@ -93,7 +93,8 @@ def check_manifest():
             url["upload_url"] = create_upload_url(s3, S3_BUCKET, key, f["type"])
         result["files"].append({
             "filename": filename,
-            "missing": missing
+            "missing": missing,
+            "type": f["type"]
         }|url)
             
     return result
@@ -104,7 +105,8 @@ def create_upload_url(s3, bucket, file_name, file_type):
         "put_object",
         Params = {
             "Bucket": bucket,
-            "Key": file_name
+            "Key": file_name,
+            "ContentType": file_type
         },
         ExpiresIn=3600
     )    
