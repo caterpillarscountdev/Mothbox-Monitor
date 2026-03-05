@@ -1,6 +1,7 @@
 import pytest
 from mothmonitor import create_app, models, database
 from flask_login import FlaskLoginClient
+from datetime import date
 
 @pytest.fixture()
 def app():
@@ -50,3 +51,11 @@ def device(app):
         database.db.session.add(d)
         database.db.session.commit()
         yield d
+
+@pytest.fixture()
+def night(app, device):
+    with app.app_context():
+        n = models.Night(night=date(2025,12,30), device_id=device.id)
+        database.db.session.add(n)
+        database.db.session.commit()
+        yield n
