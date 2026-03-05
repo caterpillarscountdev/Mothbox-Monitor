@@ -25,7 +25,18 @@ convention = {
 class ModelBase(DeclarativeBase):
     metadata = MetaData(naming_convention=convention)
 
-db = SQLAlchemy(model_class=ModelBase)
+class ExtendSQLAlchemy(SQLAlchemy):
+    def get_or_create(self, model, **kwargs):
+        instance = self.session.scalar(self.select(model).filter_by(**kwargs))
+        if instance:
+            return instance
+        else:
+            instance = model(**kwargs)
+            self.session.add(instance)
+            self.session.commit()
+            return instance      
+    
+db = ExtendSQLAlchemy(model_class=ModelBase)
 db.Model.registry.update_type_annotation_map({
         str: String()
         # add a default VARCHAR length for MySQL

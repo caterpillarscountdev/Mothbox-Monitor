@@ -1,8 +1,11 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
 from flask_security import auth_required
-from ..models import db, Device
+from ..models import db, Device, Night
+from sqlalchemy.orm import joinedload
 
 import boto3
+from botocore.exceptions import ClientError
+import dateutil
 
 
 datasets = Blueprint('datasets', __name__)
@@ -38,24 +41,29 @@ def get_s3_night_files(s3, device, night):
 @datasets.route('/list')
 @auth_required()
 def list_nights():
+    if request.args.get('refresh'):
+        nights = refresh_nights_s3()
+    else:
+        nights = db.session.execute(db.select(Night).options(joinedload(Night.device))).scalars()
+    
+    return render_template("datasets/list_nights.html", nights=nights)
+
+def refresh_nights_s3():
     nights = []
 
     s3 = boto3.client("s3")
 
     try:
         devices = get_s3_devices(s3)
-        for device in sorted(devices):
-            # add to db
-            n = get_s3_device_nights(s3, device)
-            for night in sorted(n, reverse=True):
-                # add to db
-                print(device, night)
-                nights.append({"device": device,
-                               "night": night})
-    except s3.exceptions.ClientError as e:
+        for device_name in sorted(devices):
+            device = db.get_or_create(Device, name=device_name)
+            n = get_s3_device_nights(s3, device_name)
+            for night_name in sorted(n, reverse=True):
+                night_date = dateutil.parser.parse(night_name).date()
+                night = db.get_or_create(Night, night=night_date, device_id=device.id)
+                nights.append(night)
+    except ClientError as e:
         print(f'S3 Error: {e}')
         flash(e, "error")
-    
-    
-    
-    return render_template("datasets/list_nights.html", nights=nights)
+
+    return nights

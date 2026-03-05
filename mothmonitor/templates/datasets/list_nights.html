@@ -4,6 +4,7 @@
 
 {% block content %}
 <h2>Data Collection Nights</h2>
+<p><a href="?refresh=1">Refresh from S3</a></p>
 <table class="pure-table pure-table-horizontal">
   <thead>
     <tr>
@@ -16,7 +17,7 @@
     {% set previous = namespace(device=None) %}
     {% for night in nights %}
     <tr>
-      <td>{% if night.device != previous.device %}{{night.device}}{% endif %}</td>
+      <td>{% if night.device != previous.device %}{{night.device.label or night.device.name}}{% endif %}</td>
       <td>{{night.night}}</td>
       <td></td>
     </tr>
