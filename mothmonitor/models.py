@@ -44,6 +44,7 @@ class Device(db.Model):
     upload_key: Mapped[str] = mapped_column(index=True, nullable=True)
     former_keys: Mapped[str] = mapped_column(nullable=True)
     last_seen: Mapped[datetime.datetime] = mapped_column(nullable=True)
+    last_refreshed: Mapped[datetime.datetime] = mapped_column(nullable=True)
 
     nights: Mapped[List["Night"]] = relationship(back_populates="device")
     
