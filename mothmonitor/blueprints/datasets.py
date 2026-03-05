@@ -5,6 +5,7 @@ from sqlalchemy.orm import joinedload
 
 import boto3
 from botocore.exceptions import ClientError
+from datetime import datetime
 import dateutil
 import mimetypes
 
@@ -54,7 +55,8 @@ class S3Reader:
 @datasets.route('/list')
 @auth_required()
 def list_nights():
-    if request.args.get('refresh'):
+    stale_night = db.session.execute(db.select(Device).where(Device.last_refreshed<Device.last_seen)).scalars().first()
+    if request.args.get('refresh') or stale_night:
         nights = refresh_nights_s3()
     else:
         nights = db.session.execute(db.select(Night).options(joinedload(Night.device))).scalars()
@@ -70,6 +72,7 @@ def refresh_nights_s3():
         devices = s3.get_devices()
         for device_name in sorted(devices):
             device = db.get_or_create(Device, name=device_name)
+            device.last_refreshed = datetime.now()
             n = s3.get_device_nights(device_name)
             for night_name in sorted(n, reverse=True):
                 files = s3.get_night_files(device_name, night_name)
