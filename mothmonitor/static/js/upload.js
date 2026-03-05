@@ -122,6 +122,7 @@ async function upload_start(ev) {
     let body = await resp.json()
 
     let needed = body.files.filter(x => x["missing"])
+
     let previous = body.files.length-needed.length
     console.log("needed", needed, "previous", previous)
     let msg = needed.length+" new files to upload. ";
@@ -142,9 +143,21 @@ async function upload_start(ev) {
 
     show("progress")
 
+    let fileData = {}
+    for (let f of files) {
+      fileData[f.name] = f
+    }
+    
     for (let f of needed) {
       // upload to S3 url
-      await new Promise(r => setTimeout(r, 2000));
+      let res = await fetch(f.upload_url, {
+        method: 'PUT',
+        body: fileData[f["filename"]],
+        headers: {
+          "Content-Type": f["type"]
+        }
+      })
+      
       up++;
       remainingEl.textContent = up;
       progress.value = up;
