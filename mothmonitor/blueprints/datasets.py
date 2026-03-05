@@ -20,7 +20,7 @@ class S3Reader:
         self.s3 = s3
     
     def result_prefixes(self, result, prefix=""):
-        prefixes = [f['Prefix'][:-1].replace(prefix, "") for f in result['CommonPrefixes']]
+        prefixes = [f['Prefix'][:-1].replace(prefix, "") for f in result.get('CommonPrefixes', None)]
         return prefixes
 
     def result_file_contents(self, result):
@@ -65,9 +65,7 @@ def refresh_nights_s3():
     nights = []
 
     s3 = S3Reader(boto3.client("s3"))
-    db.session.query(Night).delete()
-    db.session.query(Device).delete()
-    db.session.commit()
+
     try:
         devices = s3.get_devices()
         for device_name in sorted(devices):
