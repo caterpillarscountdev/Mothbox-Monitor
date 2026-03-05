@@ -1,0 +1,11 @@
+{% extends "base_email.html" %}
+
+{% block title %}
+Confirm New Email
+{% endblock %}
+
+{% block contents %}
+<p>{{ _fsdomain('Use <a href="%(link)s">this link</a> to confirm your new email address.', link=link)|safe }}</p>
+<p>{{ _fsdomain('This link will expire in %(within)s.', within=config["SECURITY_CHANGE_EMAIL_WITHIN"]) }}</p>
+<p>{{ _fsdomain('Your currently registered email is %(email)s.', email=user.email) }}</p>
+{% endblock %}
