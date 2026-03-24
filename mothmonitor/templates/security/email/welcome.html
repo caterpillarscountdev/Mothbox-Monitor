@@ -1,0 +1,12 @@
+{% extends "base_email.html" %}
+
+{% block title %}
+Welcome
+{% endblock %}
+
+{% block contents %}
+<p>{{ _fsdomain('Welcome %(email)s!', email=user.email) }}</p>
+{% if security.confirmable %}
+<p>{{ _fsdomain('Use <a href="%(confirmation_link)s">this link</a> to confirm your email address.', confirmation_link=confirmation_link)|safe }}</p>
+{% endif %}
+{% endblock %}

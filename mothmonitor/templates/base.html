@@ -45,9 +45,11 @@
             <li class="pure-menu-item"><a href="{{ url_for('main.index') }}" class="pure-menu-link">Dashboard</a></li>
             <li class="pure-menu-header">Monitor</li>
             <li class="pure-menu-item"><a href="{{ url_for('upload.index')}}" class="pure-menu-link">Upload</a></li>
+            {% if current_user.can("admin") %}
             <li class="pure-menu-item"><a href="{{ url_for('devices.list') }}" class="pure-menu-link">Devices</a></li>
+            {% endif %}
             {% if current_user.can("research") %}
-            <li class="pure-menu-item"><a href="{{ url_for('main.index') }}" class="pure-menu-link">Datasets</a></li>
+            <li class="pure-menu-item"><a href="{{ url_for('datasets.list_nights') }}" class="pure-menu-link">Datasets</a></li>
             {% endif %}
             <li class="pure-menu-header">Account <em> - {{current_user.email}}</em></li>
             {% if current_user.can("admin") %}

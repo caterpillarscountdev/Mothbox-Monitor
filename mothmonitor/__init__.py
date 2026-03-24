@@ -26,11 +26,22 @@ def create_app():
     auth.init_app(app)
 
 
-    from .blueprints import main, users, upload, devices
+    from .blueprints import main, users, upload, devices, datasets
     
     app.register_blueprint(main.main)
     app.register_blueprint(users.users, url_prefix="/users")
     app.register_blueprint(upload.upload, url_prefix="/upload")
-    app.register_blueprint(devices.devices)
+    app.register_blueprint(devices.devices, url_prefix="/devices")
+    app.register_blueprint(datasets.datasets, url_prefix="/datasets")
 
+    @app.template_filter()
+    def format_datetime(value, format='date'):
+        if not value:
+            return ""
+        if format == 'date':
+            format="%b %d, %Y"
+        elif format == 'datetime':
+            format="%b %d, %Y %I:%M %p"
+        return value.strftime(format)
+    
     return app

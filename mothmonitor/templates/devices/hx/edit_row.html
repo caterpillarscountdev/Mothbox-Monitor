@@ -1,0 +1,23 @@
+{% set form %}device_row_{{ device.id}}{% endset%}
+<tr>
+  <td>
+    <form id="{{form}}">
+    </form>
+    {{ device.name }}
+  </td>
+  <td><input form="{{form}}" type="text" name="label" value="{{ device.label }}" /></td>
+  <td>{{device.last_seen}}</td>
+  <td>{{device.upload_key}}</td>
+  <td>
+    <button hx-post="{{url_for('devices.device_edit', device_id=device.id)}}"
+            form="{{form}}"
+            hx-target="closest tr"
+            hx-swap="outerHTML"
+    >Save</button>
+    <button class="action" title="Invalidate key and generate new key"
+            hx-post="{{url_for('devices.create_key', device_id=device.id)}}"
+            hx-target="closest tr"
+            hx-swap="outerHTML"
+    >&#x26D4; Key &#x267B;</button>
+  </td>
+</tr>
