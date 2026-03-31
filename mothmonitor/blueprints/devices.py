@@ -1,5 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_security import auth_required, permissions_required
+from flask_cors import cross_origin
+
 from ..models import db, Device
 
 devices = Blueprint('devices', __name__)
@@ -39,3 +41,17 @@ def create_key(device_id):
     db.session.commit()
     return render_template("devices/hx/row.html", **locals())
 
+@devices.route('/check_config', methods=["POST"])
+@cross_origin()
+def check_config():
+    device_key = request.args.get('key')
+    valid_device = Device.check_device_key(device_key)
+    if not valid_device:
+        abort(401)
+
+    body = request.json
+
+    valid_device.remote_config = body["config"]
+    db.session.commit()
+
+    return {"received": "config"}
