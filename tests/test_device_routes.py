@@ -29,3 +29,49 @@ def test_device_check_config(client, device):
     
     assert "metadata" in device.remote_config
     assert device.remote_config["metadata"]["SiteName"] == "Test Site"
+
+def test_device_check_config(client, device):
+    res = client.post(f"/devices/check_config?key={device.upload_key}", json={
+        "config": {"metadata": {"SiteName": "Test Site"}},
+        "code_version": "test-123",
+    })
+    assert res.status_code < 300
+    assert "config" in res.json["received"]
+    assert "code_version" in res.json["received"]
+    assert "updated_config" not in res.json
+    
+    assert "metadata" in device.remote_config
+    assert device.remote_config["metadata"]["SiteName"] == "Test Site"
+    assert device.code_version == "test-123"
+
+def test_device_check_config_with_logs(client, device):
+    res = client.post(f"/devices/check_config?key={device.upload_key}", json={
+        "config": {"metadata": {"SiteName": "Test Site"}},
+        "code_version": "test-123",
+        "recent_logs": {"Scheduler": "text"}
+    })
+    assert res.status_code < 300
+    assert "recent_logs" in res.json["received"]
+    
+    assert 'Scheduler' in device.recent_logs
+
+def test_device_check_config_with_updates(client, device):
+    device.updated_config = {"metadata": {"SiteCrew": "New Crew"}}
+    res = client.post(f"/devices/check_config?key={device.upload_key}", json={
+        "config": {"metadata": {"SiteName": "Test Site"}},
+    })
+    assert res.status_code < 300
+    assert "config" in res.json["received"]
+    assert "updated_config" in res.json
+    assert res.json["updated_config"] == {"metadata": {"SiteCrew": "New Crew"}}
+    
+def test_device_check_config_with_updates_applied(client, device):
+    device.updated_config = {"metadata": {"SiteCrew": "New Crew"}}
+    res = client.post(f"/devices/check_config?key={device.upload_key}", json={
+        "config": {"metadata": {"SiteName": "Test Site", "SiteCrew": "New Crew"}},
+    })
+    assert res.status_code < 300
+    assert "config" in res.json["received"]
+    assert "updated_config" not in res.json
+    assert device.updated_config == None
+    

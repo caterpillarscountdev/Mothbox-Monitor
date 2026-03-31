@@ -51,7 +51,38 @@ def check_config():
 
     body = request.json
 
-    valid_device.remote_config = body["config"]
-    db.session.commit()
+    response = {"received": []}
 
-    return {"received": "config"}
+    if body.get('code_version'):
+        valid_device.code_version = body["code_version"]
+        response["received"].append("code_version")
+    if body.get('config'):
+        valid_device.remote_config = body["config"]
+        response["received"].append("config")
+    if body.get('recent_logs'):
+        valid_device.recent_logs = body["recent_logs"]
+        response["received"].append("recent_logs")
+
+    if valid_device.updated_config:
+        check = deep_update({}, valid_device.remote_config, valid_device.updated_config)
+        if check == valid_device.remote_config:
+            # Updates have been applied
+            valid_device.updated_config = None
+        else:
+            response["updated_config"] = valid_device.updated_config
+
+    db.session.commit()
+    
+    return response
+
+
+import collections.abc
+
+def deep_update(d, *ups):
+    for u in ups:
+        for k, v in u.items():
+            if isinstance(v, collections.abc.Mapping):
+                d[k] = deep_update(d.get(k, {}), v)
+            else:
+                d[k] = v
+    return d
