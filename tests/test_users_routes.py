@@ -26,4 +26,5 @@ def test_user_manage_edit_create(admin_client, mailer):
     assert b'td>test3@example.com' in res.data
     assert len(mailer) == 1
     assert mailer[0].subject == "Set your new password"
+    assert "Welcome to Moth Monitor" in mailer[0].html
 

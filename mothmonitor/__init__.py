@@ -22,6 +22,7 @@ def create_app(testing=False):
     app.config["MAIL_DEFAULT_SENDER"] = os.environ.get("MAIL_DEFAULT_SENDER", 'lopp+mothmonitor@unc.edu')
 
     app.config["SECURITY_EMAIL_SUBJECT_PASSWORD_RESET"] = "Set your new password"
+    app.config["SECURITY_EMAIL_PLAINTEXT"] = False
     
     app.config["TESTING"] = testing
     

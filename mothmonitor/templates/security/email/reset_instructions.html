@@ -5,6 +5,9 @@ Reset Password
 {% endblock %}
 
 {% block contents %}
+{% if not user.password %}
+<p>Welcome to Moth Monitor, your account is ready to set a password.</p>
+{% endif %}
 <p>
   <a href="{{ reset_link }}">{{ _fsdomain('Click here to reset your password') }}</a>
 </p>
