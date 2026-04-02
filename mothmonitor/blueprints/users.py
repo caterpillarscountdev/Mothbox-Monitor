@@ -2,6 +2,7 @@ import uuid
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_security import permissions_required, current_user
+from flask_security.recoverable import send_reset_password_instructions
 from ..models import db, User, Role
 
 users = Blueprint('users', __name__)
@@ -32,5 +33,7 @@ def manage_users_edit(user_id):
             user.fs_uniquifier = uuid.uuid4().hex 
             db.session.add(user)
         db.session.commit()
+        if not user_id:
+            send_reset_password_instructions(user)
         return render_template("users/hx/manage_users_row.html", **locals())
     return render_template("users/hx/manage_users_edit.html", **locals())
