@@ -1,3 +1,4 @@
+
 def test_user_access(client):
     res = client.get('/users/manage')
     assert res.status_code == 403
@@ -19,4 +20,11 @@ def test_user_manage_edit_new(admin_client):
 def test_user_manage_edit_existing(admin_client):
     res = admin_client.get('/users/manage/edit/1')
     assert b'ame="email" value="test2@example.com"' in res.data
-    
+
+def test_user_manage_edit_create(admin_client, mailer):
+    res = admin_client.post('/users/manage/edit/', data={"name": "Test POST", "email": "test3@example.com", "active": True})
+    assert b'td>test3@example.com' in res.data
+    assert len(mailer) == 1
+    assert mailer[0].subject == "Set your new password"
+    assert "Welcome to Moth Monitor" in mailer[0].html
+

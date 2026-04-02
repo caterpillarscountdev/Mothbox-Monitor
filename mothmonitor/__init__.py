@@ -5,7 +5,7 @@ from flask_mail import Mail
 
 from . import database, auth
 
-def create_app():
+def create_app(testing=False):
     app = Flask(__name__)
     #app.config["EXPLAIN_TEMPLATE_LOADING"] = True
     app.config["SECRET_KEY"] = os.environ.get("APP_SECRET_KEY", 'notverysecretindev')
@@ -21,6 +21,11 @@ def create_app():
     app.config["MAIL_SERVER"] = os.environ.get("MAIL_SERVER", "relay.unc.edu")
     app.config["MAIL_DEFAULT_SENDER"] = os.environ.get("MAIL_DEFAULT_SENDER", 'lopp+mothmonitor@unc.edu')
 
+    app.config["SECURITY_EMAIL_SUBJECT_PASSWORD_RESET"] = "Set your new password"
+    app.config["SECURITY_EMAIL_PLAINTEXT"] = False
+    
+    app.config["TESTING"] = testing
+    
     mail = Mail(app)
     database.init_app(app)
     auth.init_app(app)

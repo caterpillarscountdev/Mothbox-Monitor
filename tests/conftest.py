@@ -6,7 +6,7 @@ from datetime import date
 @pytest.fixture()
 def app():
     database.connection_string = "sqlite:///:memory:"
-    app = create_app()
+    app = create_app(testing=True)
     app.config.update(
         TESTING= True,
         SECRET_KEY="test_secret_key_123",  # Use a secure key in real tests
@@ -59,3 +59,8 @@ def night(app, device):
         database.db.session.add(n)
         database.db.session.commit()
         yield n
+
+@pytest.fixture()
+def mailer(app):
+    with app.extensions['mail'].record_messages() as outbox:
+        yield outbox
