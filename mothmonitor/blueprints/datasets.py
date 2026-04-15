@@ -80,6 +80,8 @@ def list_nights():
         nights = refresh_nights_s3()
     else:
         nights = db.session.execute(db.select(Night).options(joinedload(Night.device))).scalars()
+
+    nights = sorted(nights, reverse=True, key=lambda x: x.last_modified)
     
     return render_template("datasets/list_nights.html", nights=nights)
 
