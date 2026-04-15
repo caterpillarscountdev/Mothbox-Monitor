@@ -1,5 +1,6 @@
 from mothmonitor.models import Device, db
 
+
 def test_devices_list_no_auth(client, device):
     res = client.get('/devices/list')
     assert res.status_code == 302
@@ -11,6 +12,39 @@ def test_devices_list(admin_client, device):
     assert res.status_code < 300
     assert device.label
     assert f'<td>{device.label}' in res.text
+
+def test_devices_show(admin_client, device):
+    res = admin_client.get('/devices/show/1')
+    assert res.status_code < 300
+    assert device.label
+    assert f'<td>{device.label}' in res.text
+    
+    
+def test_devices_detail(admin_client, device):
+    device.code_version = "Fw-0.1.8"
+    res = admin_client.get('/devices/detail/1')
+    assert res.status_code < 300
+    assert device.code_version
+    assert f'{device.code_version}' in res.text
+
+def test_device_detail_with_config(admin_client, device):
+    device.remote_config = {
+        "metadata": {
+            "SiteName": "Test Site"
+        },
+        "schedule": {
+            "hour": "21;23;3",
+            "weekday": "2;4;6",
+            "minute": "0",
+            "camera_interval": "10",
+            "runtime": "59"
+            
+        }
+    }
+    res = admin_client.get('/devices/detail/1')
+    assert res.status_code < 300
+    assert f'{device.remote_config["schedule"]["runtime"]}</em> minutes' in res.text
+    assert f'Tuesday, Thursday, Saturday' in res.text
 
 
 def test_device_create_key_new(admin_client):

@@ -1,6 +1,8 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, abort
 from flask_security import auth_required, permissions_required
 from flask_cors import cross_origin
+
+import json
 
 from ..models import db, Device
 
@@ -11,6 +13,14 @@ devices = Blueprint('devices', __name__)
 def list():
     devices = db.session.execute(db.select(Device).order_by(Device.id)).scalars()
     return render_template("devices/list.html", **locals())
+
+@devices.route('/show/<device_id>')
+@permissions_required("admin")
+def device_show(device_id):
+    if device_id:
+        device = db.get_or_404(Device, device_id)
+    return render_template("devices/hx/row.html", **locals())
+
 
 @devices.route('/edit/', methods=["GET", "POST"], defaults={"device_id": None})
 @devices.route('/edit/<device_id>', methods=["GET", "POST"])
@@ -26,6 +36,29 @@ def device_edit(device_id):
         db.session.commit()
         return render_template("devices/hx/row.html", **locals())
     return render_template("devices/hx/edit_row.html", **locals())
+
+
+days_of_week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+
+@devices.route('/detail/<device_id>', methods=["GET", "POST"])
+@permissions_required("admin")
+def device_detail(device_id):
+    if device_id:
+        device = db.get_or_404(Device, device_id)
+    if type(device.remote_config) is str:
+        config = json.loads(device.remote_config)
+    else:
+        config = device.remote_config
+    print(config)
+    if config and config["schedule"]:
+        days = [days_of_week[int(x)-1] for x in config["schedule"]["weekday"].split(";")]
+        hours = [f'{int(x):02}:{config["schedule"]["minute"]:02}' for x in config["schedule"]["hour"].split(";")]
+    return render_template("devices/hx/detail_row.html", **locals())
+
+
+@devices.route('/empty')
+def empty():
+    return ""
 
 
 @devices.route('/create_key', defaults={"device_id": None}, methods=["POST"])
