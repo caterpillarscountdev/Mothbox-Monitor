@@ -1,8 +1,8 @@
-from typing import List
+from typing import List, Optional
 import datetime
 import secrets
 
-from sqlalchemy import ForeignKey, Integer, String, Text, DateTime
+from sqlalchemy import ForeignKey, Integer, String, Text, DateTime, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 
@@ -32,6 +32,7 @@ class Night(db.Model):
     uploaded_started_at: Mapped[datetime.datetime] = mapped_column(nullable=True)
     last_modified: Mapped[datetime.datetime] = mapped_column(nullable=True)
     photo_count: Mapped[int] = mapped_column(nullable=True)
+    last_photo: Mapped[str] = mapped_column(nullable=True)
     
     device_id: Mapped[int] = mapped_column(ForeignKey("device.id"))
     device: Mapped["Device"] = relationship(back_populates="nights")    
@@ -46,6 +47,12 @@ class Device(db.Model):
     last_seen: Mapped[datetime.datetime] = mapped_column(nullable=True)
     last_refreshed: Mapped[datetime.datetime] = mapped_column(nullable=True)
 
+    code_version: Mapped[Optional[str]] = mapped_column(nullable=True)
+    recent_logs: Mapped[Optional[JSON]] = mapped_column(type_=JSON, nullable=True)
+
+    remote_config: Mapped[Optional[JSON]] = mapped_column(type_=JSON, nullable=True)
+    updated_config: Mapped[Optional[JSON]] = mapped_column(type_=JSON, nullable=True)
+
     nights: Mapped[List["Night"]] = relationship(back_populates="device")
     
     def generate_upload_key(self):
@@ -56,3 +63,7 @@ class Device(db.Model):
         self.upload_key = secrets.token_hex(16)
         return self.upload_key
 
+
+    @classmethod
+    def check_device_key(cls, key):
+        return db.session.scalars(db.select(cls).where(cls.upload_key==key)).first()

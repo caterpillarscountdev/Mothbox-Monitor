@@ -55,6 +55,8 @@ def test_datasets_list_from_s3_by_db(admin_client, mocker, device):
     assert nights[0].device_id != device.id
     assert nights[0].photo_count == 2
     assert nights[0].night.strftime("%Y-%m-%d") == '2025-12-31'
+    assert nights[0].last_photo == "one/2025-12-31/one_2025_12_31__18_40_10_HDR0.jpg"
+    assert nights[0].last_modified == datetime.datetime(2026, 1, 29, 14, 35, 18)
 
     
 def test_datasets_list_from_db(admin_client, mocker, night):

@@ -1,5 +1,9 @@
 <tr>
-  <td>{{ device.name }}</td>
+  <td class="action"
+      hx-get="{{url_for('devices.device_detail', device_id=device.id)}}"
+      hx-target="next tr"
+      hx-swap="outerHTML"
+  >{{ device.name }}</td>
   <td>{{ device.label or ""}}</td>
   <td>{{ device.last_seen|format_datetime("datetime") }}</td>
   <td>{{ device.upload_key }}</td>
@@ -10,3 +14,4 @@
       >&#x270E;</button>
   </td>
 </tr>
+<tr></tr>
