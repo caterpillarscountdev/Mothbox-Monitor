@@ -49,7 +49,6 @@ def device_detail(device_id):
         config = json.loads(device.remote_config)
     else:
         config = device.remote_config
-    print(config)
     if config and config["schedule"]:
         days = [days_of_week[int(x)-1] for x in config["schedule"]["weekday"].split(";")]
         hours = [f'{int(x):02}:{config["schedule"]["minute"]:02}' for x in config["schedule"]["hour"].split(";")]

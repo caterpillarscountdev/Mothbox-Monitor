@@ -1,0 +1,15 @@
+<tr
+    hx-get="{{url_for('devices.empty')}}"
+    hx-swap="innerHTML"
+>
+  <td colspan="6">
+    <dl class="config">
+      <dt>Last Photo</dt>
+      <dd>
+        <a href="{{last_photo_url}}">
+          <img src="{{last_photo_url}}" width="300" height="200" />
+        </a>
+      </dd>
+    </dl>
+  </td>
+</tr>
