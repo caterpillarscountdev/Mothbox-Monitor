@@ -16,11 +16,6 @@ def s3_prefix(device, night):
     return os.path.join(device, night)
 
 
-def _check_device_key(key):
-    return db.session.scalars(db.select(Device).where(Device.upload_key==key)).first()
-        
-
-
 @upload.route('/')
 @auth_required()
 def index():
@@ -30,7 +25,7 @@ def index():
 @cross_origin()
 def check_key():
     device_key = request.args.get('key')
-    if not _check_device_key(device_key):
+    if not Device.check_device_key(device_key):
         abort(401)
     return "ok"
     
@@ -40,7 +35,7 @@ def check_key():
 def check_manifest():
 
     device_key = request.args.get('key')
-    valid_device = _check_device_key(device_key)
+    valid_device = Device.check_device_key(device_key)
     if not (current_user.is_authenticated or valid_device):
         abort(401)
 

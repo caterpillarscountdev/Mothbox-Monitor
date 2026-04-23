@@ -1,0 +1,37 @@
+<tr
+    hx-get="{{url_for('devices.empty')}}"
+    hx-swap="innerHTML"
+>
+  <td colspan="6">
+    <dl class="config">
+      <dt>Site Name</dt>
+      <dd>
+        {% if config.metadata %}
+        {{config.metadata.SiteName}}
+        {% endif %}
+      </dd>
+      <dt>Lat/lon</dt>
+      <dd>
+        {% if config.metadata %}
+        {{config.metadata.SiteLat}}, {{config.metadata.SiteLon}}
+        {% endif %}
+      </dd>
+      <dt>Code Version</dt>
+      <dd>
+        {{device.code_version}}
+      </dd>
+      <dt>Schedule</dt>
+      <dd>
+        {% if config.schedule and days and hours %}
+        {{ ", ".join(days)}}</em><br> at <em class="status-label">{{ ", ".join(hours)}}</em><br> every <em class="status-label">{{config.schedule.camera_interval}}</em> minutes for <em class="status-label">{{config.schedule.runtime}}</em> minutes
+        {% endif %}
+      </dd>
+      <dt>Attract</dt>
+      <dd>
+        {% if config.schedule %}
+         OnlyFlash: {{config.schedule.onlyflash}}, 2nd Strip: {{config.schedule.attracttwo}}
+        {% endif %}
+      </dd>
+    </dl>
+  </td>
+</tr>

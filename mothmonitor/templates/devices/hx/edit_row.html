@@ -19,5 +19,10 @@
             hx-target="closest tr"
             hx-swap="outerHTML"
     >&#x26D4; Key &#x267B;</button>
+    <button class="action" title="Cancel"
+            hx-get="{{url_for('devices.device_show', device_id=device.id)}}"
+            hx-target="closest tr"
+            hx-swap="outerHTML"
+    >&#x21A9;</button>
   </td>
 </tr>

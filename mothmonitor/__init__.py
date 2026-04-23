@@ -1,5 +1,7 @@
 import os
 
+from datetime import timezone
+
 from flask import Flask
 from flask_mail import Mail
 
@@ -40,9 +42,11 @@ def create_app(testing=False):
     app.register_blueprint(datasets.datasets, url_prefix="/datasets")
 
     @app.template_filter()
-    def format_datetime(value, format='date'):
+    def format_datetime(value, format='date', utc=True):
         if not value:
             return ""
+        if utc:
+            value = value.replace(tzinfo=timezone.utc).astimezone(tz=None)
         if format == 'date':
             format="%b %d, %Y"
         elif format == 'datetime':

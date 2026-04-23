@@ -46,7 +46,7 @@ def admin_client(admin_user, app):
 @pytest.fixture()
 def device(app):
     with app.app_context():
-        d = models.Device(name="")
+        d = models.Device(name="", label="Test Device")
         d.generate_upload_key()
         database.db.session.add(d)
         database.db.session.commit()
