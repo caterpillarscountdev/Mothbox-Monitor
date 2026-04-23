@@ -79,7 +79,7 @@ def list_nights():
     if request.args.get('refresh') or stale_night:
          refresh_nights_s3()
 
-    nights = db.paginate(db.select(Night).options(joinedload(Night.device)).order_by(Night.last_modified), per_page=20, error_out=False)
+    nights = db.paginate(db.select(Night).options(joinedload(Night.device)).order_by(Night.last_modified.desc()), per_page=20, error_out=False)
 
     if nights.page != 1 and len(nights.items) == 0:
         return redirect(url_for(request.endpoint, page=1))
