@@ -4,7 +4,6 @@
 
 {% block content %}
 <h2>Data Collection Nights</h2>
-<p><a href="?refresh=1">Refresh from S3</a></p>
 <table class="pure-table pure-table-horizontal">
   <thead>
     <tr>
@@ -32,7 +31,9 @@
     <tr></tr>
     {% set previous.device = night.device %}
     {% endfor %}
+
   </tbody>
 </table>
+{{ render_pagination(nights) }}
 
 {% endblock %}

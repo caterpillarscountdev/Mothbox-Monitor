@@ -2,6 +2,38 @@
 <img class="htmx-indicator" src="/static/images/spinner-oval.svg" alt="Loading...">
 {% endmacro %}
 
+{% macro render_pagination(pagination, endpoint=None) %}
+{% set endpoint = endpoint or request.endpoint %}
+<div class=pagination>
+  <div>
+    {{ pagination.first }} - {{ pagination.last }} of {{ pagination.total }}
+  </div>
+  <div>
+    {% if pagination.has_prev %}
+    <a href="{{ url_for(endpoint, page=pagination.prev_num) }}">&#x2B9C;</a>
+    {% else %}
+    <span class=inactive>&#x2B9C;</span>
+    {% endif %}
+    {% for page in pagination.iter_pages() %}
+    {% if page %}
+    {% if page != pagination.page %}
+    <a href="{{ url_for(endpoint, page=page) }}">{{ page }}</a>
+    {% else %}
+    <strong>{{ page }}</strong>
+    {% endif %}
+    {% else %}
+    <span class=ellipsis>…</span>
+    {% endif %}
+    {% endfor %}
+    {% if pagination.has_next %}
+    <a href="{{ url_for(endpoint, page=pagination.next_num) }}">&#x2B9E;</a>
+    {% else %}
+    <span class=inactive>&#x2B9E;</span>
+    {% endif %}
+  </div>
+</div>
+{% endmacro %}
+
 
 {% block doc -%}
 <!DOCTYPE html>
