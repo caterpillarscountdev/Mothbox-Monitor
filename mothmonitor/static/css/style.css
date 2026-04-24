@@ -4,6 +4,7 @@
     --button-color:  #beedc2;
     --button-border-color: #393;
     --ok-color: #393;
+    --text-color: #000;
 }
 
 body {
@@ -130,6 +131,10 @@ body {
 
 .pagination .inactive {
     color: #999;
+}
+
+.pure-table th a {
+    color: var(--text-color);
 }
 
 /* Forms */
