@@ -79,12 +79,22 @@ def list_nights():
     if request.args.get('refresh') or stale_night:
          refresh_nights_s3()
 
-    nights = db.paginate(db.select(Night).options(joinedload(Night.device)).order_by(Night.last_modified.desc()), per_page=20, error_out=False)
+    sort = request.args.get('sort', 'last_modified')
+    sort_asc = request.args.get('asc', False)
+
+    select = db.select(Night).options(joinedload(Night.device))
+    if sort:
+        sorter = getattr(Night, sort)
+        if not sort_asc:
+            sorter = sorter.desc()
+        select = select.order_by(sorter)
+    
+    nights = db.paginate(select, per_page=20, error_out=False)
 
     if nights.page != 1 and len(nights.items) == 0:
         return redirect(url_for(request.endpoint, page=1))
 
-    return render_template("datasets/list_nights.html", nights=nights)
+    return render_template("datasets/list_nights.html", nights=nights, sort=sort, sort_asc=sort_asc)
 
 def refresh_nights_s3():
     nights = []

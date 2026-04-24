@@ -2,15 +2,24 @@
 
 {% block title %}Data Collection Nights{% endblock %}
 
+{% macro sort_column(label, field) %}
+{% set rev = sort==field and not sort_asc and "1" or "" %}
+<a href="?sort={{field}}&asc={{ rev }}" style="color:">{{label}}</a>
+
+{% if sort==field %}
+ {% if sort_asc %}&#x2193;{% else %}&#x2191;{% endif %}
+{% endif %}
+{% endmacro %}
+
 {% block content %}
 <h2>Data Collection Nights</h2>
 <table class="pure-table pure-table-horizontal">
   <thead>
     <tr>
-      <th>Device</th>
-      <th>Night</th>
+      <th>{{sort_column("Device", "device_id")}}</th>
+      <th>{{sort_column("Night", "night")}}</th>
+      <th>{{sort_column("Upload Date", "last_modified")}}</th>
       <th>Photos</th>
-      <th>Upload Date</th>
       <th>On Antenna</th>
     </tr>
   </thead>
@@ -20,12 +29,12 @@
     <tr>
       <td>{% if night.device != previous.device %}{{night.device.label or night.device.name}}{% endif %}</td>
       <td>{{night.night}}</td>
+      <td>{{night.last_modified|format_datetime("datetime", utc=False)}}</td>
       <td class="action"
           hx-get="{{url_for('datasets.night_detail', night_id=night.id)}}"
           hx-target="next tr"
           hx-swap="outerHTML"
       >{{night.photo_count}}</td>
-      <td>{{night.last_modified|format_datetime("datetime", utc=False)}}</td>
       <td></td>
     </tr>
     <tr></tr>
