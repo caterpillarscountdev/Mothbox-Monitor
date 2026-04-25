@@ -1,4 +1,4 @@
-from mothmonitor.models import Device, db
+from mothmonitor.models import db, Device, User
 
 
 def test_devices_list_no_auth(client, device):
@@ -47,6 +47,45 @@ def test_device_detail_with_config(admin_client, device):
     assert f'Tuesday, Thursday, Saturday' in res.text
 
 
+def test_device_edit(admin_client, device):
+    res = admin_client.post(f'/devices/edit/{device.id}', data={
+        "label": "Green Giant"
+    })
+    assert res.status_code < 300
+    d = db.session.execute(db.select(Device)).scalar()
+    assert d.label == 'Green Giant'
+    
+def test_device_edit_users(admin_client, device, site_user):
+    d = list(db.session.execute(db.select(User)).scalars())
+    assert len(d) == 2
+    assert len(device.site_users) == 0
+    res = admin_client.post(f'/devices/edit/{device.id}', data={
+        "label": "Green Chair",
+        "site_users": [site_user.id],
+    })
+    assert res.status_code < 300
+    d = db.session.execute(db.select(Device)).scalar()
+    assert d.label == 'Green Chair'
+    assert len(d.site_users) == 1
+
+def test_device_edit_users_and_remove(admin_client, device, site_user):
+    d = list(db.session.execute(db.select(User)).scalars())
+    assert len(d) == 2
+    assert len(device.site_users) == 0
+    res = admin_client.post(f'/devices/edit/{device.id}', data={
+        "site_users": [site_user.id],
+    })
+    assert res.status_code < 300
+    d = db.session.execute(db.select(Device)).scalar()
+    assert len(d.site_users) == 1
+    res = admin_client.post(f'/devices/edit/{device.id}', data={
+        "site_users": [],
+    })
+    assert res.status_code < 300
+    d = db.session.execute(db.select(Device)).scalar()
+    assert len(d.site_users) == 0
+    
+    
 def test_device_create_key_new(admin_client):
     res = admin_client.post('/devices/create_key')
     assert res.status_code < 300

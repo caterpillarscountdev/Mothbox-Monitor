@@ -4,13 +4,13 @@ from flask_cors import cross_origin
 
 import json
 
-from ..models import db, Device
+from ..models import db, Device, User, Role
 
 devices = Blueprint('devices', __name__)
 
 @devices.route('/list')
 @auth_required()
-def list():
+def list_devices():
     devices = db.session.execute(db.select(Device).order_by(Device.id)).scalars()
     return render_template("devices/list.html", **locals())
 
@@ -29,8 +29,15 @@ def device_edit(device_id):
     device = Device(name="")
     if device_id:
         device = db.get_or_404(Device, device_id)
+    users = list(db.session.execute(db.select(User).where(User.roles.any(Role.name=='Site'))).scalars())
+    user_count = len(users)
     if request.method == "POST":
         device.label = request.form.get('label')
+        user_ids = request.form.getlist('site_users')
+        if user_ids:
+            device.site_users = list(db.session.execute(db.select(User).filter(User.id.in_(user_ids))).scalars())
+        else:
+            device.site_users = []
         if not device_id:
             db.session.add(device)
         db.session.commit()

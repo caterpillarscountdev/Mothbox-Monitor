@@ -40,6 +40,16 @@ def admin_user(app):
         yield u
 
 @pytest.fixture()
+def site_user(app):
+    with app.app_context():
+        role = database.db.session.scalars(database.db.select(models.Role).where(models.Role.name=="Site")).first()
+        u = models.User(name='Test Site', email="testsite@example.com", password="test", fs_uniquifier="3", active=True, roles=[role])
+        database.db.session.add(u)
+        database.db.session.commit()
+        yield u
+
+        
+@pytest.fixture()
 def admin_client(admin_user, app):
     return app.test_client(user=admin_user)
 

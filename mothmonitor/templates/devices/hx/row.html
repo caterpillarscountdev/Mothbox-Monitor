@@ -1,10 +1,11 @@
-<tr>
+<tr valign="top">
   <td class="action"
       hx-get="{{url_for('devices.device_detail', device_id=device.id)}}"
       hx-target="next tr"
       hx-swap="outerHTML"
   >{{ device.name }}</td>
   <td>{{ device.label or ""}}</td>
+  <td>{% for u in device.site_users %}<div>{{ u.name}}</div>{%endfor %}</td>
   <td>{{ device.last_seen|format_datetime("datetime") }}</td>
   <td>{{ device.upload_key }}</td>
   <td><button class="action"
