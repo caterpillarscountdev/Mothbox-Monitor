@@ -29,7 +29,7 @@
     <tr>
       <td>{% if night.device != previous.device %}{{night.device.label or night.device.name}}{% endif %}</td>
       <td>{{night.night}}</td>
-      <td>{{night.last_modified|format_datetime("datetime", utc=False)}}</td>
+      <td>{{night.last_modified|format_datetime("datetime")}}</td>
       <td class="action"
           hx-get="{{url_for('datasets.night_detail', night_id=night.id)}}"
           hx-target="next tr"

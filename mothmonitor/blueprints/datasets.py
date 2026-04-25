@@ -83,11 +83,15 @@ def list_nights():
     sort_asc = request.args.get('asc', False)
 
     select = db.select(Night).options(joinedload(Night.device))
+    sorts = []
     if sort:
         sorter = getattr(Night, sort)
         if not sort_asc:
             sorter = sorter.desc()
-        select = select.order_by(sorter)
+        sorts.append(sorter)
+        if sort == 'device_id':
+            sorts.append(Night.night.desc())
+        select = select.order_by(*sorts)
     
     nights = db.paginate(select, per_page=20, error_out=False)
 
