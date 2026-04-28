@@ -4,6 +4,7 @@
     --button-color:  #beedc2;
     --button-border-color: #393;
     --ok-color: #393;
+    --text-color: #000;
 }
 
 body {
@@ -111,6 +112,30 @@ body {
     min-width: 1.5em;
 }
 
+.pagination {
+    padding: 0.4rem;
+    font-size: large;
+}
+
+.pagination>div {
+    display: inline-block;
+    margin-right: 2rem;
+}
+.pagination>div:last-child {
+    font-size: x-large;
+}
+
+.pagination a {
+    text-decoration: none;
+}
+
+.pagination .inactive {
+    color: #999;
+}
+
+.pure-table th a {
+    color: var(--text-color);
+}
 
 /* Forms */
 

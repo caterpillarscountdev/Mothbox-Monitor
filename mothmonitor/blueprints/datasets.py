@@ -77,13 +77,28 @@ def s3_read_url(bucket, key, expires_in=3600):
 def list_nights():
     stale_night = db.session.execute(db.select(Device).where(Device.last_refreshed<Device.last_seen)).scalars().first()
     if request.args.get('refresh') or stale_night:
-        nights = refresh_nights_s3()
-    else:
-        nights = db.session.execute(db.select(Night).options(joinedload(Night.device))).scalars()
+         refresh_nights_s3()
 
-    nights = sorted(nights, reverse=True, key=lambda x: x.last_modified)
+    sort = request.args.get('sort', 'last_modified')
+    sort_asc = request.args.get('asc', False)
+
+    select = db.select(Night).options(joinedload(Night.device))
+    sorts = []
+    if sort:
+        sorter = getattr(Night, sort)
+        if not sort_asc:
+            sorter = sorter.desc()
+        sorts.append(sorter)
+        if sort == 'device_id':
+            sorts.append(Night.night.desc())
+        select = select.order_by(*sorts)
     
-    return render_template("datasets/list_nights.html", nights=nights)
+    nights = db.paginate(select, per_page=20, error_out=False)
+
+    if nights.page != 1 and len(nights.items) == 0:
+        return redirect(url_for(request.endpoint, page=1))
+
+    return render_template("datasets/list_nights.html", nights=nights, sort=sort, sort_asc=sort_asc)
 
 def refresh_nights_s3():
     nights = []

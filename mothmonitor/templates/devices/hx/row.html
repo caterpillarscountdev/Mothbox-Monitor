@@ -6,7 +6,7 @@
   >{{ device.name }}</td>
   <td>{{ device.label or ""}}</td>
   <td>{% for u in device.site_users %}<div>{{ u.name}}</div>{%endfor %}</td>
-  <td>{{ device.last_seen|format_datetime("datetime") }}</td>
+  <td>{{ device.last_seen|format_datetime("datetime", utc=False) }}</td>
   <td>{{ device.upload_key }}</td>
   <td><button class="action"
               hx-get="{{url_for('devices.device_edit', device_id=device.id)}}"
