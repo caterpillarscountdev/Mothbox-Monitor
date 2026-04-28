@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
-from flask_security import auth_required
-from ..models import db, Device, Night
+from flask_security import auth_required, current_user
+from ..models import db, Device, Night, User
 from sqlalchemy.orm import joinedload
 
 import boto3
@@ -92,6 +92,10 @@ def list_nights():
         if sort == 'device_id':
             sorts.append(Night.night.desc())
         select = select.order_by(*sorts)
+    if current_user.can("site") and not current_user.can("research"):
+        ids = [x.id for x in current_user.site_devices]
+        # restrict query to assigned devices
+        select = select.join(Night.device).filter(Device.id.in_(ids))
     
     nights = db.paginate(select, per_page=20, error_out=False)
 
