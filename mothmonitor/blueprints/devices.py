@@ -17,7 +17,7 @@ def config_schedule(config, format="full"):
     
     if config and config["schedule"]:
         days = [days_of_week[int(x)-1] for x in config["schedule"]["weekday"].split(";")]
-        hours = [f'{int(x):02}:{config["schedule"]["minute"]:02}' for x in config["schedule"]["hour"].split(";")]
+        hours = [f'{int(x):02}:{int(config["schedule"]["minute"]):02}' for x in config["schedule"]["hour"].split(";")]
         runtime = config["schedule"]["runtime"]
         if format == "full":
             return  f'{", ".join(days)}</em><br> at <em class="status-label">{ ", ".join(hours)}</em><br> every <em class="status-label">{config["schedule"]["camera_interval"]}</em> min for <em class="status-label">{runtime}</em> min with {config["schedule"].get("attracttwo", None) and "two strips" or "one strip"}'
