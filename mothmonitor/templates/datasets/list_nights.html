@@ -33,7 +33,7 @@
       <td>{{night.last_modified|format_datetime("datetime")}}</td>
       <td>
         {% if night.config %}
-        <span title="{{night.config|config_schedule('full')|striptags}}">{{ night.config|config_schedule("small")|safe }}</span>
+        <span data-title="{{night.config|config_schedule('full')|striptags}}">{{ night.config|config_schedule("small")|safe }}</span>
         {% endif %}
       </td>
       <td class="action"
