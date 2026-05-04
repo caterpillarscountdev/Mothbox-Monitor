@@ -22,9 +22,7 @@
       </dd>
       <dt>Schedule</dt>
       <dd>
-        {% if config.schedule and days and hours %}
-        {{ ", ".join(days)}}</em><br> at <em class="status-label">{{ ", ".join(hours)}}</em><br> every <em class="status-label">{{config.schedule.camera_interval}}</em> minutes for <em class="status-label">{{config.schedule.runtime}}</em> minutes
-        {% endif %}
+        {{ config|config_schedule|safe }}
       </dd>
       <dt>Attract</dt>
       <dd>

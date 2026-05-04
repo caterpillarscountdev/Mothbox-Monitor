@@ -44,6 +44,8 @@ class Night(db.Model):
     last_modified: Mapped[datetime.datetime] = mapped_column(nullable=True)
     photo_count: Mapped[int] = mapped_column(nullable=True)
     last_photo: Mapped[str] = mapped_column(nullable=True)
+
+    config: Mapped[Optional[JSON]] = mapped_column(type_=JSON, nullable=True)
     
     device_id: Mapped[int] = mapped_column(ForeignKey("device.id"))
     device: Mapped["Device"] = relationship(back_populates="nights")    
