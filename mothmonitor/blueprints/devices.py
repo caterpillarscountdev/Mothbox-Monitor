@@ -22,7 +22,7 @@ def config_schedule(config, format="full"):
         if format == "full":
             return  f'{", ".join(days)}</em><br> at <em class="status-label">{ ", ".join(hours)}</em><br> every <em class="status-label">{config["schedule"]["camera_interval"]}</em> min for <em class="status-label">{runtime}</em> min with {config["schedule"].get("attracttwo", None) and "two strips" or "one strip"}'
         elif format == "small":
-            return f'{len(days)} days of {len(hours)*runtime//60} hrs'
+            return f'{len(days)} days of {len(hours)*runtime/60:.1f} hrs'
     else:
         return "N/A"
 
