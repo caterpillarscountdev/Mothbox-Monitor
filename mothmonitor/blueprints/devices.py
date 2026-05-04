@@ -20,10 +20,11 @@ def config_schedule(config, format="full"):
         hours = [f'{int(x):02}:{int(config["schedule"]["minute"]):02}' for x in config["schedule"]["hour"].split(";")]
         runtime = config["schedule"]["runtime"]
         interval = config["schedule"]["camera_interval"]
+        attracttwo = str(config["schedule"].get("attracttwo", None)).lower() in ["1", "true"]
         if format == "full":
-            return  f'{", ".join(days)}</em><br> at <em class="status-label">{ ", ".join(hours)}</em><br> every <em class="status-label">{interval}</em> min for <em class="status-label">{runtime}</em> min with {config["schedule"].get("attracttwo", None) and "two strips" or "one strip"}'
+            return  f'{", ".join(days)}</em><br> at <em class="status-label">{ ", ".join(hours)}</em><br> every <em class="status-label">{interval}</em> min for <em class="status-label">{runtime}</em> min with {attracttwo and "two strips" or "one strip"}'
         elif format == "small":
-            return f'{len(hours)*runtime/60:.1f} hrs {config["schedule"].get("attracttwo", None) and "&#x1F4A1;&#x1F4A1;" or "&#x1F4A1;"} {interval}m '
+            return f'{len(hours)*runtime/60:.1f} hrs {attracttwo and "&#x1F4A1;&#x1F4A1;" or "&#x1F4A1;"} {interval}m '
     else:
         return "N/A"
 
