@@ -67,3 +67,22 @@ def test_datasets_list_from_db(admin_client, mocker, night):
     assert res.status_code == 200
 
     assert f"<td>{night.night.strftime('%Y-%m-%d')}</td>" in  res.text
+
+def test_datasets_list_for_site_user(site_user, mocker, client_site_user, night):
+    c = mocker.patch("boto3.client")
+    assert site_user.site_devices == []
+    res = client_site_user.get('/datasets/list')
+
+    assert res.status_code == 200
+
+    assert f"<td>{night.night.strftime('%Y-%m-%d')}</td>" not in  res.text
+    
+def test_datasets_list_for_site_user_assigned(site_user_assigned, mocker, client_site_user, night):
+    c = mocker.patch("boto3.client")
+        
+    res = client_site_user.get('/datasets/list')
+
+    assert res.status_code == 200
+
+    assert f"<td>{night.night.strftime('%Y-%m-%d')}</td>"  in  res.text
+    

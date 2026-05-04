@@ -6,6 +6,13 @@
     {{ device.name }}
   </td>
   <td><input form="{{form}}" type="text" name="label" value="{{ device.label }}" /></td>
+  <td>
+    <select form="{{form}}" name="site_users" multiple size="{{[user_count, 3]|min }}">
+      {% for user in users %}
+      <option value="{{user.id}}" {% if user in device.site_users %}selected{% endif %}>{{user.name}}</option>
+      {% endfor %}
+    </select>
+  </td>
   <td>{{device.last_seen}}</td>
   <td>{{device.upload_key}}</td>
   <td>

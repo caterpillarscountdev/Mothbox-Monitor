@@ -19,6 +19,7 @@
       <th>{{sort_column("Device", "device_id")}}</th>
       <th>{{sort_column("Night", "night")}}</th>
       <th>{{sort_column("Upload Date", "last_modified")}}</th>
+      <td>Schedule</td>
       <th>Photos</th>
       <th>On Antenna</th>
     </tr>
@@ -29,7 +30,12 @@
     <tr>
       <td>{% if night.device != previous.device %}{{night.device.label or night.device.name}}{% endif %}</td>
       <td>{{night.night}}</td>
-      <td>{{night.last_modified|format_datetime("datetime", utc=False)}}</td>
+      <td>{{night.last_modified|format_datetime("datetime")}}</td>
+      <td>
+        {% if night.config %}
+        <span title="{{night.config|config_schedule('full')|striptags}}">{{ night.config|config_schedule("small")|safe }}</span>
+        {% endif %}
+      </td>
       <td class="action"
           hx-get="{{url_for('datasets.night_detail', night_id=night.id)}}"
           hx-target="next tr"

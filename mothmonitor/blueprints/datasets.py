@@ -1,8 +1,9 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
-from flask_security import auth_required
-from ..models import db, Device, Night
+from flask_security import auth_required, current_user
+from ..models import db, Device, Night, User
 from sqlalchemy.orm import joinedload
 
+import json
 import boto3
 from botocore.exceptions import ClientError
 from datetime import datetime
@@ -50,6 +51,16 @@ class S3Reader:
                                  Prefix=f'{device_name}{DELIM}{night_name}{DELIM}')
         return self.result_file_contents(result)
 
+    def get_night_metadata_json(self, device_name, night_name):
+        S3_BUCKET = current_app.config['S3_BUCKET']
+        try:
+            result = self.s3.get_object(Bucket=S3_BUCKET,
+                                        Key=f'{device_name}{DELIM}{night_name}{DELIM}metadata.json')
+        except self.s3.exceptions.NoSuchKey as e:
+            return None
+        return json.loads(result["Body"].read().decode('utf-8'))
+        
+
 @datasets.route('/detail/<night_id>')
 @auth_required()
 def night_detail(night_id):
@@ -83,11 +94,19 @@ def list_nights():
     sort_asc = request.args.get('asc', False)
 
     select = db.select(Night).options(joinedload(Night.device))
+    sorts = []
     if sort:
         sorter = getattr(Night, sort)
         if not sort_asc:
             sorter = sorter.desc()
-        select = select.order_by(sorter)
+        sorts.append(sorter)
+        if sort == 'device_id':
+            sorts.append(Night.night.desc())
+        select = select.order_by(*sorts)
+    if current_user.can("site") and not current_user.can("research"):
+        ids = [x.id for x in current_user.site_devices]
+        # restrict query to assigned devices
+        select = select.join(Night.device).filter(Device.id.in_(ids))
     
     nights = db.paginate(select, per_page=20, error_out=False)
 
@@ -114,6 +133,7 @@ def refresh_nights_s3():
                 photo_count = len(photos)
                 last_photo = photos[-1]["filename"]
                 last_modified = photos[-1]["lastModified"]
+                config = s3.get_night_metadata_json(device_name, night_name)
                 night_date = dateutil.parser.parse(night_name).date()
                 night = db.get_or_create(Night,
                                          night=night_date,
@@ -122,6 +142,7 @@ def refresh_nights_s3():
                 night.photo_count = photo_count
                 night.last_modified = last_modified
                 night.last_photo = last_photo
+                night.config = config
                 
                 nights.append(night)
         db.session.commit()

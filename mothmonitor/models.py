@@ -2,7 +2,7 @@ from typing import List, Optional
 import datetime
 import secrets
 
-from sqlalchemy import ForeignKey, Integer, String, Text, DateTime, JSON
+from sqlalchemy import ForeignKey, Integer, String, Text, DateTime, JSON, Table, Column
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 
@@ -12,8 +12,19 @@ from .database import db
 
 fsqla.FsModels.set_db_info(db)
 
+user_site_devices = Table(
+    "user_site_devices",
+    db.Model.metadata,
+    Column("user_id", ForeignKey("user.id"), primary_key=True),
+    Column("device_id", ForeignKey("device.id"), primary_key=True),
+)
+
 class User(db.Model, fsqla.FsUserMixin):
     name: Mapped[str] = mapped_column(index=True, nullable=True)
+
+    site_devices: Mapped[List["Device"]] = relationship(
+        secondary=user_site_devices, back_populates="site_users"
+    )    
 
     def can(self, perm):
         for role in self.roles:
@@ -21,9 +32,9 @@ class User(db.Model, fsqla.FsUserMixin):
                 return True
         return False
 
+    
 class Role(db.Model, fsqla.FsRoleMixin):
     pass
-
 
 
 class Night(db.Model):
@@ -33,6 +44,8 @@ class Night(db.Model):
     last_modified: Mapped[datetime.datetime] = mapped_column(nullable=True)
     photo_count: Mapped[int] = mapped_column(nullable=True)
     last_photo: Mapped[str] = mapped_column(nullable=True)
+
+    config: Mapped[Optional[JSON]] = mapped_column(type_=JSON, nullable=True)
     
     device_id: Mapped[int] = mapped_column(ForeignKey("device.id"))
     device: Mapped["Device"] = relationship(back_populates="nights")    
@@ -54,7 +67,11 @@ class Device(db.Model):
     updated_config: Mapped[Optional[JSON]] = mapped_column(type_=JSON, nullable=True)
 
     nights: Mapped[List["Night"]] = relationship(back_populates="device")
-    
+
+    site_users: Mapped[List[User]] = relationship(
+        secondary=user_site_devices, back_populates="site_devices"
+    )    
+
     def generate_upload_key(self):
         if self.upload_key:
             keys = self.former_keys and [self.former_keys] or []

@@ -4,13 +4,31 @@ from flask_cors import cross_origin
 
 import json
 
-from ..models import db, Device
+from ..models import db, Device, User, Role
 
 devices = Blueprint('devices', __name__)
 
+days_of_week = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
+
+@devices.app_template_filter()
+def config_schedule(config, format="full"):
+    if type(config) is str:
+        config = json.loads(config)
+    
+    if config and config["schedule"]:
+        days = [days_of_week[int(x)-1] for x in config["schedule"]["weekday"].split(";")]
+        hours = [f'{int(x):02}:{config["schedule"]["minute"]:02}' for x in config["schedule"]["hour"].split(";")]
+        runtime = config["schedule"]["runtime"]
+        if format == "full":
+            return  f'{", ".join(days)}</em><br> at <em class="status-label">{ ", ".join(hours)}</em><br> every <em class="status-label">{config["schedule"]["camera_interval"]}</em> min for <em class="status-label">{runtime}</em> min with {config["schedule"].get("attracttwo", None) and "two strips" or "one strip"}'
+        elif format == "small":
+            return f'{len(days)} days of {len(hours)*runtime//60} hrs'
+    else:
+        return "N/A"
+
 @devices.route('/list')
 @auth_required()
-def list():
+def list_devices():
     devices = db.session.execute(db.select(Device).order_by(Device.id)).scalars()
     return render_template("devices/list.html", **locals())
 
@@ -29,16 +47,21 @@ def device_edit(device_id):
     device = Device(name="")
     if device_id:
         device = db.get_or_404(Device, device_id)
+    users = list(db.session.execute(db.select(User).where(User.roles.any(Role.name=='Site'))).scalars())
+    user_count = len(users)
     if request.method == "POST":
         device.label = request.form.get('label')
+        user_ids = request.form.getlist('site_users')
+        if user_ids:
+            device.site_users = list(db.session.execute(db.select(User).filter(User.id.in_(user_ids))).scalars())
+        else:
+            device.site_users = []
         if not device_id:
             db.session.add(device)
         db.session.commit()
         return render_template("devices/hx/row.html", **locals())
     return render_template("devices/hx/edit_row.html", **locals())
 
-
-days_of_week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 @devices.route('/detail/<device_id>', methods=["GET", "POST"])
 @permissions_required("admin")
@@ -49,9 +72,6 @@ def device_detail(device_id):
         config = json.loads(device.remote_config)
     else:
         config = device.remote_config
-    if config and config["schedule"]:
-        days = [days_of_week[int(x)-1] for x in config["schedule"]["weekday"].split(";")]
-        hours = [f'{int(x):02}:{config["schedule"]["minute"]:02}' for x in config["schedule"]["hour"].split(";")]
     return render_template("devices/hx/detail_row.html", **locals())
 
 
