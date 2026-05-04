@@ -29,6 +29,7 @@ span[data-title] {
 }
 span[data-title]:hover:after {
     content: attr(data-title);
+    z-index: 100;
     padding: 3px;
     position: absolute;
     left: 0;
