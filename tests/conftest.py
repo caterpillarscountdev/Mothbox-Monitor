@@ -13,7 +13,8 @@ def app():
         SECRET_KEY="test_secret_key_123",  # Use a secure key in real tests
         SESSION_COOKIE_SECURE=False,
         SESSION_COOKIE_HTTPONLY=False,
-        SESSION_COOKIE_PATH="/"
+        SESSION_COOKIE_PATH="/",
+        S3_BUCKET="Test-Test",
     )
 
     app.test_client_class = FlaskLoginClient
