@@ -1,18 +1,28 @@
+import os
+import pytest
 from mothmonitor.models import db, Device, User, Night
 from mothmonitor import antenna
 
-api_base = "https://antenna.insectai.org/api/v2"
+api_base = "http://test/api/v2"
+
+
+@pytest.fixture(autouse=True)
+def env_vars(monkeypatch):
+    monkeypatch.setenv("ANTENNA_URL", "http://test/")
+    monkeypatch.setenv("ANTENNA_PROJECT_ID", "1")
+    monkeypatch.setenv("ANTENNA_API_TOKEN", "abcd")
+
 
 def test_antenna_client_deployments(requests_mock):
     a = antenna.AntennaAPI()
 
-    requests_mock.get(f"{api_base}/deployments/?project_id=", json={"count": 2, "results": [{"id": 1}]})
+    requests_mock.get(f"{api_base}/deployments/?project_id=1", json={"count": 2, "results": [{"id": 1}]})
 
     r = a.deployments()
 
     assert requests_mock.called
-    assert requests_mock.request_history[0].url == f"{api_base}/deployments/?project_id="
-    assert requests_mock.request_history[0].headers["Authorization"] == "Token "
+    assert requests_mock.request_history[0].url == f"{api_base}/deployments/?project_id=1"
+    assert requests_mock.request_history[0].headers["Authorization"] == "Token abcd"
 
     assert r == [{"id": 1}]
 
@@ -37,7 +47,7 @@ def test_antenna_client_events(requests_mock):
 
     assert requests_mock.called
     assert requests_mock.request_history[0].url == f"{api_base}/events/?deployment=1"
-    assert requests_mock.request_history[0].headers["Authorization"] == "Token "
+    assert requests_mock.request_history[0].headers["Authorization"] == "Token abcd"
 
     assert r == [{"id": 1}]
 
@@ -55,7 +65,7 @@ def test_antenna_client_get_event(requests_mock):
     
 
 def test_device_edit_lists_deployments(admin_client, device, requests_mock):
-    a_url = f"{api_base}/deployments/?project_id="
+    a_url = f"{api_base}/deployments/?project_id=1"
     requests_mock.get(a_url, json={
         "count": 1,
         "results": [

@@ -6,10 +6,11 @@ class APIError(Exception):
 
 class AntennaAPI(object):
 
-    antenna_url = os.environ.get("ANTENNA_URL", "https://antenna.insectai.org/")
-    api_path = os.environ.get("ANTENNA_API_PATH", "api/v2")
-    project_id = os.environ.get("ANTENNA_PROJECT_ID", "")
-    auth_token = os.environ.get("ANTENNA_API_TOKEN", "")
+    def __init__(self):
+        self.antenna_url = os.environ.get("ANTENNA_URL", "https://antenna.insectai.org/")
+        self.api_path = os.environ.get("ANTENNA_API_PATH", "api/v2")
+        self.project_id = os.environ.get("ANTENNA_PROJECT_ID", "")
+        self.auth_token = os.environ.get("ANTENNA_API_TOKEN", "")
 
     def build_url(self, path, api=True):
         api_path = self.api_path
