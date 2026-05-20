@@ -5,7 +5,8 @@ from datetime import date
 
 
 @pytest.fixture()
-def app():
+def app(requests_mock, mocker):
+    mocker.patch("boto3.client")
     database.connection_string = "sqlite:///:memory:"
     app = create_app(testing=True)
     app.config.update(

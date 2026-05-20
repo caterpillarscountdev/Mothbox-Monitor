@@ -13,6 +13,14 @@
       {% endfor %}
     </select>
   </td>
+  <td>
+    <select form="{{form}}" name="antenna_deployment">
+      {% for deployment in deployments %}
+      <option value="{{deployment.id}}"{% if deployment.id == device.antenna_deployment %} selected{% endif %}>{{deployment.name}}</option>
+      {% endfor %}
+    </select>
+  </td>
+  
   <td>{{device.last_seen}}</td>
   <td>{{device.upload_key}}</td>
   <td>
