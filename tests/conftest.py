@@ -73,6 +73,22 @@ def device(app):
     yield d
 
 @pytest.fixture()
+def device_2(app):
+    d = models.Device(name="", label="Sample Device")
+    d.generate_upload_key()
+    database.db.session.add(d)
+    database.db.session.commit()
+    yield d
+
+@pytest.fixture()
+def device_3(app):
+    d = models.Device(name="", label="Another Device")
+    d.generate_upload_key()
+    database.db.session.add(d)
+    database.db.session.commit()
+    yield d
+    
+@pytest.fixture()
 def night(app, device):
     n = models.Night(night=date(2025,12,30), device_id=device.id)
     database.db.session.add(n)

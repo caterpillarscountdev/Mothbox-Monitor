@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
 from flask_security import auth_required, current_user
-from ..models import db, Device, Night, User
+
 from sqlalchemy.orm import joinedload
 
 import json
@@ -9,6 +9,9 @@ from botocore.exceptions import ClientError
 from datetime import datetime
 import dateutil
 import mimetypes
+
+from ..models import db, Device, Night, User
+from .. import antenna
 
 
 datasets = Blueprint('datasets', __name__)
@@ -90,6 +93,10 @@ def list_nights():
     if request.args.get('refresh') or stale_night:
          refresh_nights_s3()
 
+    syncs = antenna.sync_stale_deployments()
+    if len(syncs):
+        flash(f"Syncing {len(syncs)} devices/stations on Antenna", "ok")
+         
     sort = request.args.get('sort', 'last_modified')
     sort_asc = request.args.get('asc', False)
 

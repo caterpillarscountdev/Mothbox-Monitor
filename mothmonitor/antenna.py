@@ -1,5 +1,7 @@
 import os
 import requests
+from datetime import datetime
+from .models import db, Device
 
 class APIError(Exception):
     pass
@@ -46,3 +48,19 @@ class AntennaAPI(object):
 
     def event_url(self, pk):
         return self.build_url(f"/projects/{self.project_id}/session/{pk}", api=False)
+
+
+def stale_deployments():
+    select = db.select(Device).where(
+        (Device.antenna_deployment != None) &
+        ((Device.last_seen>Device.antenna_last_synced ) | (Device.antenna_last_synced == None))
+    )
+    return db.session.execute(select).scalars()
+
+def sync_stale_deployments():
+    api = AntennaAPI()
+    ds = list(stale_deployments())
+    for d in ds:
+        api.sync_deployment(d.antenna_deployment)
+        d.antenna_last_synced = datetime.now()
+    return ds

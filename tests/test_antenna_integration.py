@@ -1,5 +1,6 @@
 import os
 import pytest
+from datetime import datetime
 from mothmonitor.models import db, Device, User, Night
 from mothmonitor import antenna
 
@@ -62,6 +63,39 @@ def test_antenna_client_get_event(requests_mock):
     assert requests_mock.request_history[0].url == f"{api_base}/events/1/"
 
     assert r == {"id": 1}
+
+def test_stale_deployments(requests_mock, device, device_2, device_3):
+    # has no sync date
+    device.antenna_deployment = 1
+    device.last_seen = datetime(2026, 5, 1)
+    device.antenna_last_synced = None
+
+    # has sync date later than seen
+    device_2.antenna_deployment = 2
+    device_2.last_seen = datetime(2026, 5, 1)
+    device_2.antenna_last_synced = datetime(2026, 5, 2)
+
+    # device 3 has no antenna deployment
+    
+    r = list(antenna.stale_deployments())
+
+    assert len(r) == 1
+    assert device in r
+
+def test_sync_stale_deployments(requests_mock, device, device_2):
+    device.antenna_deployment = 1
+    device.last_seen = datetime(2026, 5, 5)
+    device.antenna_last_synced = datetime(2026, 5, 1)
+
+    requests_mock.post(f"{api_base}/deployments/1/sync", json={})
+
+    r = antenna.sync_stale_deployments()
+
+    assert requests_mock.call_count == 1
+    assert requests_mock.request_history[0].url == f"{api_base}/deployments/1/sync"
+    assert requests_mock.request_history[0].method == "POST"
+
+    assert r[0].antenna_last_synced > r[0].last_seen
     
 
 def test_device_edit_lists_deployments(admin_client, device, requests_mock):
@@ -94,5 +128,4 @@ def test_device_edit_lists_deployments(admin_client, device, requests_mock):
     assert res.status_code < 300
     assert requests_mock.called
     assert requests_mock.request_history[0].url == a_url
-    print(res.text)
     assert "<option value=\"1\">Default Station" in res.text
