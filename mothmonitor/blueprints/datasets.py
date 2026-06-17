@@ -131,6 +131,8 @@ def refresh_nights_s3():
                 photos = [f for f in files if f["type"] == 'image/jpeg']
                 photos = sorted(photos, key=lambda x: x["lastModified"])
                 photo_count = len(photos)
+                if photo_count < 1:
+                    continue
                 last_photo = photos[-1]["filename"]
                 last_modified = photos[-1]["lastModified"]
                 config = s3.get_night_metadata_json(device_name, night_name)

@@ -70,12 +70,12 @@ def test_check_manifest_existing_file(client, device, mocker):
     assert res.status_code == 200
 
     c.assert_called_with("s3")
-    c.return_value.head_object.assert_called_with(Bucket='lo-mmm-test', Key='testDevice/2026-01-01/test.jpg')
+    c.return_value.head_object.assert_called_with(Bucket='test-bucket', Key='testDevice/2026-01-01/test.jpg')
     c.return_value.generate_presigned_url.assert_not_called()
 
     assert len(res.json["files"]) == 1
     assert res.json["files"][0]["filename"] == "test.jpg"
-    assert res.json["files"][0]["location"] == "https://lo-mmm-test.s3.amazonaws.com/testDevice/2026-01-01/test.jpg"
+    assert res.json["files"][0]["location"] == "https://test-bucket.s3.amazonaws.com/testDevice/2026-01-01/test.jpg"
     assert res.json["files"][0]["missing"] == False
     assert "upload_url" not in res.json["files"][0]
 
@@ -93,11 +93,11 @@ def test_check_manifest_missing_file(client, device, mocker):
     assert res.status_code == 200
 
     c.assert_called_with("s3")
-    c.return_value.head_object.assert_called_with(Bucket='lo-mmm-test', Key='testDevice/2026-01-01/test.jpg')
-    c.return_value.generate_presigned_url.assert_called_with('put_object', Params={'Bucket': 'lo-mmm-test', 'Key': 'testDevice/2026-01-01/test.jpg', 'ContentType': 'image/jpeg'}, ExpiresIn=3600)
+    c.return_value.head_object.assert_called_with(Bucket='test-bucket', Key='testDevice/2026-01-01/test.jpg')
+    c.return_value.generate_presigned_url.assert_called_with('put_object', Params={'Bucket': 'test-bucket', 'Key': 'testDevice/2026-01-01/test.jpg', 'ContentType': 'image/jpeg'}, ExpiresIn=3600)
 
     assert len(res.json["files"]) == 1
     assert res.json["files"][0]["filename"] == "test.jpg"
-    assert res.json["files"][0]["location"] == "https://lo-mmm-test.s3.amazonaws.com/testDevice/2026-01-01/test.jpg"
+    assert res.json["files"][0]["location"] == "https://test-bucket.s3.amazonaws.com/testDevice/2026-01-01/test.jpg"
     assert res.json["files"][0]["missing"] == True
     assert res.json["files"][0]["upload_url"] == "signed_url"

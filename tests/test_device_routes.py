@@ -43,8 +43,8 @@ def test_device_detail_with_config(admin_client, device):
     }
     res = admin_client.get('/devices/detail/1')
     assert res.status_code < 300
-    assert f'{device.remote_config["schedule"]["runtime"]}</em> minutes' in res.text
-    assert f'Tuesday, Thursday, Saturday' in res.text
+    assert f'{device.remote_config["schedule"]["runtime"]}</em> min with' in res.text
+    assert f'Tu, Th, Sa' in res.text
 
 
 def test_device_edit(admin_client, device):
