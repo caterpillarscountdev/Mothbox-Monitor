@@ -9,6 +9,7 @@ from botocore.exceptions import ClientError
 from datetime import datetime
 import dateutil
 import mimetypes
+from NamedAtomicLock import NamedAtomicLock
 
 from ..models import db, Device, Night, User
 from .. import antenna
@@ -16,7 +17,7 @@ from .. import antenna
 
 datasets = Blueprint('datasets', __name__)
 
-
+NIGHT_LOCK = NamedAtomicLock("refresh_nights", maxLockAge=30)
 DELIM = "/"
 
 
@@ -89,9 +90,9 @@ def s3_read_url(bucket, key, expires_in=3600):
 @datasets.route('/list')
 @auth_required()
 def list_nights():
-    stale_night = db.session.execute(db.select(Device).where(Device.last_refreshed<Device.last_seen)).scalars().first()
-    if request.args.get('refresh') or stale_night:
-         refresh_nights_s3()
+    forced_refresh = request.args.get('refresh')
+    if forced_refresh or has_stale_night():
+         refresh_nights_s3(forced_refresh=forced_refresh)
 
     syncs = antenna.sync_stale_deployments()
     if len(syncs):
@@ -122,7 +123,22 @@ def list_nights():
 
     return render_template("datasets/list_nights.html", nights=nights, sort=sort, sort_asc=sort_asc)
 
-def refresh_nights_s3():
+def has_stale_night():
+    return db.session.execute(db.select(Device).where(Device.last_refreshed<Device.last_seen)).scalars().first()
+
+def refresh_nights_s3(**kwargs):
+    if NIGHT_LOCK.acquire(timeout=2):
+        try:
+            _refresh_nights_s3(**kwargs)
+        finally:
+            NIGHT_LOCK.release()
+    
+
+def _refresh_nights_s3(forced_refresh=False):
+    if not has_stale_night() and not forced_refresh:
+        # Skip if we've been waiting for lock and another process has completed.
+        return
+    
     nights = []
 
     s3 = S3Reader(boto3.client("s3"))

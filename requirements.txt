@@ -31,6 +31,7 @@ libpass==1.9.3
 Mako==1.3.10
 MarkupSafe==3.0.3
 mysqlclient==2.2.7
+NamedAtomicLock==1.1.3
 packaging==25.0
 pluggy==1.6.0
 pycparser==2.23
