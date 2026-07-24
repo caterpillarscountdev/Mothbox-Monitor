@@ -41,7 +41,7 @@
           hx-target="next tr"
           hx-swap="outerHTML"
       >{{night.photo_count}}</td>
-      <td></td>
+      <td>{% if night.device.antenna_deployment %}<a href="{{station_url(night.device.antenna_deployment)}}">See Station</a>{% endif %}</td>
     </tr>
     <tr></tr>
     {% set previous.device = night.device %}

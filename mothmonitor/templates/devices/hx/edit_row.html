@@ -5,7 +5,7 @@
     </form>
     {{ device.name }}
   </td>
-  <td><input form="{{form}}" type="text" name="label" value="{{ device.label }}" /></td>
+  <td><input form="{{form}}" type="text" name="label" value="{{ device.label or '' }}" /></td>
   <td>
     <select form="{{form}}" name="site_users" multiple size="{{[user_count, 3]|min }}">
       {% for user in users %}
@@ -15,6 +15,7 @@
   </td>
   <td>
     <select form="{{form}}" name="antenna_deployment">
+      <option value=""{% if not device.antenna_deployment %} selected{% endif %}>(None)</option>
       {% for deployment in deployments %}
       <option value="{{deployment.id}}"{% if deployment.id == device.antenna_deployment %} selected{% endif %}>{{deployment.name}}</option>
       {% endfor %}

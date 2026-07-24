@@ -94,9 +94,12 @@ def list_nights():
     if forced_refresh or has_stale_night():
          refresh_nights_s3(forced_refresh=forced_refresh)
 
-    syncs = antenna.sync_stale_deployments()
-    if len(syncs):
-        flash(f"Syncing {len(syncs)} devices/stations on Antenna", "ok")
+    try:
+        syncs = antenna.sync_stale_deployments()
+        if len(syncs):
+            flash(f"Syncing {len(syncs)} stations on Antenna", "ok")
+    except antenna.APIError as e:
+        flash(f"{e}", "error")
          
     sort = request.args.get('sort', 'last_modified')
     sort_asc = request.args.get('asc', False)
@@ -121,7 +124,7 @@ def list_nights():
     if nights.page != 1 and len(nights.items) == 0:
         return redirect(url_for(request.endpoint, page=1))
 
-    return render_template("datasets/list_nights.html", nights=nights, sort=sort, sort_asc=sort_asc)
+    return render_template("datasets/list_nights.html", nights=nights, sort=sort, sort_asc=sort_asc, station_url=antenna.station_url)
 
 def has_stale_night():
     return db.session.execute(db.select(Device).where(Device.last_refreshed<Device.last_seen)).scalars().first()
