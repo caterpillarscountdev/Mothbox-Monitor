@@ -5,7 +5,7 @@ from flask_cors import cross_origin
 import json
 
 from ..models import db, Device, User, Role
-from ..antenna import AntennaAPI
+from ..antenna import AntennaAPI, APIError
 
 devices = Blueprint('devices', __name__)
 
@@ -65,7 +65,10 @@ def device_edit(device_id):
         db.session.commit()
         return render_template("devices/hx/row.html", **locals())
 
-    deployments = AntennaAPI().deployments()
+    try:
+        deployments = AntennaAPI().deployments()
+    except APIError as e:
+        deployments = []
     
     return render_template("devices/hx/edit_row.html", **locals())
 
