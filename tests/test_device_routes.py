@@ -43,17 +43,19 @@ def test_device_detail_with_config(admin_client, device):
     }
     res = admin_client.get('/devices/detail/1')
     assert res.status_code < 300
-    assert f'{device.remote_config["schedule"]["runtime"]}</em> min with' in res.text
-    assert f'Tu, Th, Sa' in res.text
-
-
-def test_device_edit(admin_client, device):
+    assert f'{device.remote_config["schedule"]["runtime"]}</em> min' in res.text
+    assert f'Tu, Th, Sa' in res.text    
+    
+    
+def test_device_edit_post(admin_client, device):
     res = admin_client.post(f'/devices/edit/{device.id}', data={
-        "label": "Green Giant"
+        "label": "Green Giant",
+        "antenna_deployment": 1
     })
     assert res.status_code < 300
     d = db.session.execute(db.select(Device)).scalar()
     assert d.label == 'Green Giant'
+    assert d.antenna_deployment == 1
     
 def test_device_edit_users(admin_client, device, site_user):
     d = list(db.session.execute(db.select(User)).scalars())

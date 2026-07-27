@@ -5,17 +5,17 @@ from datetime import date
 
 
 @pytest.fixture()
-def app(mocker):
-    c = mocker.patch("boto3.client")
+def app(requests_mock, mocker):
+    mocker.patch("boto3.client")
     database.connection_string = "sqlite:///:memory:"
     app = create_app(testing=True)
     app.config.update(
         TESTING= True,
         SECRET_KEY="test_secret_key_123",  # Use a secure key in real tests
-        S3_BUCKET="test-bucket",
         SESSION_COOKIE_SECURE=False,
         SESSION_COOKIE_HTTPONLY=False,
-        SESSION_COOKIE_PATH="/"
+        SESSION_COOKIE_PATH="/",
+        S3_BUCKET="Test-Test",
     )
 
     app.test_client_class = FlaskLoginClient
@@ -72,6 +72,22 @@ def device(app):
     database.db.session.commit()
     yield d
 
+@pytest.fixture()
+def device_2(app):
+    d = models.Device(name="", label="Sample Device")
+    d.generate_upload_key()
+    database.db.session.add(d)
+    database.db.session.commit()
+    yield d
+
+@pytest.fixture()
+def device_3(app):
+    d = models.Device(name="", label="Another Device")
+    d.generate_upload_key()
+    database.db.session.add(d)
+    database.db.session.commit()
+    yield d
+    
 @pytest.fixture()
 def night(app, device):
     n = models.Night(night=date(2025,12,30), device_id=device.id)

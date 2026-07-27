@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
 from flask_security import auth_required, current_user
-from ..models import db, Device, Night, User
+
 from sqlalchemy.orm import joinedload
 
 import json
@@ -9,11 +9,16 @@ from botocore.exceptions import ClientError
 from datetime import datetime
 import dateutil
 import mimetypes
+from NamedAtomicLock import NamedAtomicLock
+
+from ..models import db, Device, Night, User
+from .. import antenna
 
 
 datasets = Blueprint('datasets', __name__)
 
-
+NIGHT_LOCK = NamedAtomicLock("refresh_nights", maxLockAge=30)
+SYNC_LOCK = NamedAtomicLock("sync_nights", maxLockAge=30)
 DELIM = "/"
 
 
@@ -86,10 +91,17 @@ def s3_read_url(bucket, key, expires_in=3600):
 @datasets.route('/list')
 @auth_required()
 def list_nights():
-    stale_night = db.session.execute(db.select(Device).where(Device.last_refreshed<Device.last_seen)).scalars().first()
-    if request.args.get('refresh') or stale_night:
-         refresh_nights_s3()
+    forced_refresh = request.args.get('refresh')
+    if forced_refresh or has_stale_night():
+         refresh_nights_s3(forced_refresh=forced_refresh)
 
+    try:
+        syncs = sync_nights_antenna()
+        if len(syncs):
+            flash(f"Syncing {len(syncs)} stations on Antenna", "ok")
+    except antenna.APIError as e:
+        flash(f"{e}", "error")
+         
     sort = request.args.get('sort', 'last_modified')
     sort_asc = request.args.get('asc', False)
 
@@ -113,9 +125,33 @@ def list_nights():
     if nights.page != 1 and len(nights.items) == 0:
         return redirect(url_for(request.endpoint, page=1))
 
-    return render_template("datasets/list_nights.html", nights=nights, sort=sort, sort_asc=sort_asc)
+    return render_template("datasets/list_nights.html", nights=nights, sort=sort, sort_asc=sort_asc, station_url=antenna.station_url)
 
-def refresh_nights_s3():
+def has_stale_night():
+    return db.session.execute(db.select(Device).where(Device.last_refreshed<Device.last_seen)).scalars().first()
+
+def sync_nights_antenna():
+    syncs = []
+    if SYNC_LOCK.acquire(timeout=2):
+        try:
+            syncs = antenna.sync_stale_deployments()
+        finally:
+            SYNC_LOCK.release()
+    return syncs
+
+def refresh_nights_s3(**kwargs):
+    if NIGHT_LOCK.acquire(timeout=2):
+        try:
+            _refresh_nights_s3(**kwargs)
+        finally:
+            NIGHT_LOCK.release()
+    
+
+def _refresh_nights_s3(forced_refresh=False):
+    if not has_stale_night() and not forced_refresh:
+        # Skip if we've been waiting for lock and another process has completed.
+        return
+    
     nights = []
 
     s3 = S3Reader(boto3.client("s3"))

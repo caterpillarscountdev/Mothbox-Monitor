@@ -46,6 +46,8 @@ class Night(db.Model):
     last_photo: Mapped[str] = mapped_column(nullable=True)
 
     config: Mapped[Optional[JSON]] = mapped_column(type_=JSON, nullable=True)
+
+    antenna_event: Mapped[Optional[int]] = mapped_column(nullable=True)
     
     device_id: Mapped[int] = mapped_column(ForeignKey("device.id"))
     device: Mapped["Device"] = relationship(back_populates="nights")    
@@ -66,6 +68,9 @@ class Device(db.Model):
     remote_config: Mapped[Optional[JSON]] = mapped_column(type_=JSON, nullable=True)
     updated_config: Mapped[Optional[JSON]] = mapped_column(type_=JSON, nullable=True)
 
+    antenna_deployment: Mapped[Optional[int]] = mapped_column(nullable=True)
+    antenna_last_synced: Mapped[datetime.datetime] = mapped_column(nullable=True)
+    
     nights: Mapped[List["Night"]] = relationship(back_populates="device")
 
     site_users: Mapped[List[User]] = relationship(
