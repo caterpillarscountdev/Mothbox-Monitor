@@ -18,6 +18,7 @@ from .. import antenna
 datasets = Blueprint('datasets', __name__)
 
 NIGHT_LOCK = NamedAtomicLock("refresh_nights", maxLockAge=30)
+SYNC_LOCK = NamedAtomicLock("sync_nights", maxLockAge=30)
 DELIM = "/"
 
 
@@ -95,7 +96,7 @@ def list_nights():
          refresh_nights_s3(forced_refresh=forced_refresh)
 
     try:
-        syncs = antenna.sync_stale_deployments()
+        syncs = sync_nights_antenna()
         if len(syncs):
             flash(f"Syncing {len(syncs)} stations on Antenna", "ok")
     except antenna.APIError as e:
@@ -128,6 +129,15 @@ def list_nights():
 
 def has_stale_night():
     return db.session.execute(db.select(Device).where(Device.last_refreshed<Device.last_seen)).scalars().first()
+
+def sync_nights_antenna():
+    syncs = []
+    if SYNC_LOCK.acquire(timeout=2):
+        try:
+            syncs = antenna.sync_stale_deployments()
+        finally:
+            SYNC_LOCK.release()
+    return syncs
 
 def refresh_nights_s3(**kwargs):
     if NIGHT_LOCK.acquire(timeout=2):
