@@ -1,5 +1,5 @@
 {% set form %}device_row_{{ device.id}}{% endset%}
-{% set deployment_seen = False %}
+{% set deploys = namespace(seen = False) %}
 <tr>
   <td>
     <form id="{{form}}">
@@ -18,9 +18,10 @@
     <select form="{{form}}" name="antenna_deployment">
       <option value=""{% if not device.antenna_deployment %} selected{% endif %}>(None)</option>
       {% for deployment in deployments %}
-      <option value="{{deployment.id}}"{% if deployment.id == device.antenna_deployment %} selected{% set deployment_seen=True %}{% endif %}>{{deployment.name}}</option>
+      <option value="{{deployment.id}}"{% if deployment.id == device.antenna_deployment %} selected{% set deploys.seen=True %}{% endif %}>{{deployment.name}}</option>
       {% endfor %}
-      {% if device.antenna_deployment and not deployment_seen %}
+      {{deployment_seen}}
+      {% if device.antenna_deployment and not deploys.seen %}
       <option value="{{device.antenna_deployment}}" selected>{{device.antenna_deployment}}</option>
       {% endif %}
     </select>
