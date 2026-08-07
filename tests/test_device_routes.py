@@ -45,9 +45,24 @@ def test_device_detail_with_config(admin_client, device):
     assert res.status_code < 300
     assert f'{device.remote_config["schedule"]["runtime"]}</em> min' in res.text
     assert f'Tu, Th, Sa' in res.text    
+
+def test_device_edit_post(admin_client, device, requests_mock):
+    res = admin_client.post(f'/devices/edit/{device.id}', data={
+        "label": "Green Giant",
+        "antenna_deployment": ""
+    })
+    assert res.status_code < 300
+    d = db.session.execute(db.select(Device)).scalar()
+    assert d.label == 'Green Giant'
     
+def test_device_edit_post_with_antenna(admin_client, device, requests_mock):
+    a_url = f"/api/v2/deployments/1/"
+    requests_mock.get(a_url, json={
+        "id": 1,
+        "name": "Default Station",
+        "data_source_subdir": "testBear"
+    })
     
-def test_device_edit_post(admin_client, device):
     res = admin_client.post(f'/devices/edit/{device.id}', data={
         "label": "Green Giant",
         "antenna_deployment": 1
@@ -56,7 +71,12 @@ def test_device_edit_post(admin_client, device):
     d = db.session.execute(db.select(Device)).scalar()
     assert d.label == 'Green Giant'
     assert d.antenna_deployment == 1
-    
+    assert requests_mock.called
+    assert requests_mock.request_history[0].url.endswith(a_url)
+
+    assert device.antenna_deployment_name == 'Default Station'
+    assert device.storage_subdir == 'testBear'
+
 def test_device_edit_users(admin_client, device, site_user):
     d = list(db.session.execute(db.select(User)).scalars())
     assert len(d) == 2

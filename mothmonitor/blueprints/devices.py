@@ -54,7 +54,15 @@ def device_edit(device_id):
     user_count = len(users)
     if request.method == "POST":
         device.label = request.form.get('label')
-        device.antenna_deployment = request.form.get('antenna_deployment')
+        antenna_deployment_id = request.form.get('antenna_deployment')
+        if antenna_deployment_id and device.antenna_deployment != antenna_deployment_id:
+            device.antenna_deployment = request.form.get('antenna_deployment')
+            try:
+                deployment = AntennaAPI().deployment(antenna_deployment_id)
+                device.antenna_deployment_name = deployment["name"]
+                device.storage_subdir = deployment["data_source_subdir"]
+            except APIError as e:
+                print(f"APIError for {antenna_deployment_id}: {e}")
         user_ids = request.form.getlist('site_users')
         if user_ids:
             device.site_users = list(db.session.execute(db.select(User).filter(User.id.in_(user_ids))).scalars())
