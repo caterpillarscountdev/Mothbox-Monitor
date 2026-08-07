@@ -101,3 +101,25 @@ def test_check_manifest_missing_file(client, device, mocker):
     assert res.json["files"][0]["location"] == "https://Test-Test.s3.amazonaws.com/testDevice/2026-01-01/test.jpg"
     assert res.json["files"][0]["missing"] == True
     assert res.json["files"][0]["upload_url"] == "signed_url"
+
+def test_check_manifest_overrides_subdir(client, device, mocker):
+    c = mocker.patch("boto3.client")
+    c.return_value.head_object.raiseError.side_effect = c.exceptions.ClientError()
+    c.return_value.generate_presigned_url.return_value = "signed_url"
+
+    device.storage_subdir = "overrideDir"
+    
+    res = client.post('/upload/check_manifest?key='+device.upload_key, json={
+        "deviceName": "testDevice",
+        "night": "2026-01-01",
+        "files": [{"filename": "test.jpg", "size": 1048, "type": "image/jpeg"}]
+    })
+
+    assert res.status_code == 200
+
+    c.assert_called_with("s3")
+    c.return_value.head_object.assert_called_with(Bucket='Test-Test', Key='overrideDir/2026-01-01/test.jpg')
+    c.return_value.generate_presigned_url.assert_called_with('put_object', Params={'Bucket': 'Test-Test', 'Key': 'overrideDir/2026-01-01/test.jpg', 'ContentType': 'image/jpeg'}, ExpiresIn=3600)
+
+    assert len(res.json["files"]) == 1
+    assert res.json["files"][0]["location"] == "https://Test-Test.s3.amazonaws.com/overrideDir/2026-01-01/test.jpg"
