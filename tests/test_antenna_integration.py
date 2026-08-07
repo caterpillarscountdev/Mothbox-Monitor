@@ -139,3 +139,4 @@ def test_device_edit_lists_deployments(admin_client, device, requests_mock):
     assert requests_mock.called
     assert requests_mock.request_history[0].url == a_url
     assert "<option value=\"1\">Default Station" in res.text
+

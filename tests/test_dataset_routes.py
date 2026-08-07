@@ -18,6 +18,7 @@ def test_datasets_list_from_s3(admin_client, mocker):
         {"CommonPrefixes": [{"Prefix": "2025-12-31/"}]},
         {'Contents': [{'Key': 'one/2025-12-31/one_2025_12_31__18_40_10_HDR0.jpg', 'LastModified': datetime.datetime(2026, 1, 29, 14, 35, 18), 'ETag': '"cd8e167ee507db4933bec6493b0ea499"', 'ChecksumAlgorithm': ['CRC64NVME'], 'ChecksumType': 'FULL_OBJECT', 'Size': 22179295, 'StorageClass': 'STANDARD', 'Owner': {'ID': 'f4a5b1702a148cd25ba2419d72d5e036112b75c6d93225c1719da9d33045f4a2'}}, {'Key': 'one/2025-12-31/one_2025_12_31__19_20_10_HDR0.jpg', 'LastModified': datetime.datetime(2026, 1, 29, 14, 35), 'ETag': '"5fb9fd29ef9e108736f388d782ed9f55"', 'ChecksumAlgorithm': ['CRC64NVME'], 'ChecksumType': 'FULL_OBJECT', 'Size': 22291229, 'StorageClass': 'STANDARD', 'Owner': {'ID': 'f4a5b1702a148cd25ba2419d72d5e036112b75c6d93225c1719da9d33045f4a2'}}], 'Name': 'lo-mmm-test', 'Prefix': 'one/2025-12-31/', 'Delimiter': '/'}
         ]
+
     res = admin_client.get('/datasets/list?refresh=1')
 
     assert res.status_code == 200
