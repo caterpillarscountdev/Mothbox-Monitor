@@ -2,6 +2,7 @@ import os
 import requests
 from datetime import datetime
 from .models import db, Device
+from .jobs import enqueue_one
 
 class APIError(Exception):
     pass
@@ -66,6 +67,11 @@ def stale_deployments():
         ((Device.last_seen>Device.antenna_last_synced ) | (Device.antenna_last_synced == None))
     )
     return db.session.execute(select).scalars()
+
+def enqueue_sync_stale_deployments():
+    ds = list(stale_deployments())
+    enqueue_one(sync_stale_deployments)
+    return ds
 
 def sync_stale_deployments():
     api = AntennaAPI()

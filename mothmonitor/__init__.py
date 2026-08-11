@@ -4,10 +4,11 @@ from datetime import timezone
 
 from flask import Flask
 from flask_mail import Mail
+from flask_rq import RQ
 
-from . import database, auth
+from . import database, auth, jobs
 
-def create_app(testing=False):
+def create_app(testing=False, redis_connection=None):
     app = Flask(__name__)
     #app.config["EXPLAIN_TEMPLATE_LOADING"] = True
     app.config["SECRET_KEY"] = os.environ.get("APP_SECRET_KEY", 'notverysecretindev')
@@ -27,11 +28,15 @@ def create_app(testing=False):
     app.config["SECURITY_EMAIL_PLAINTEXT"] = False
     
     app.config["TESTING"] = testing
+    app.testing = True
+
+    if redis_connection:
+        app.config["RQ_CONNECTION"] = redis_connection
     
     mail = Mail(app)
     database.init_app(app)
     auth.init_app(app)
-
+    jobs.init_app(app)
 
     from .blueprints import main, users, upload, devices, datasets
     

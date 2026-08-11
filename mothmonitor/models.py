@@ -89,3 +89,6 @@ class Device(db.Model):
     @classmethod
     def check_device_key(cls, key):
         return db.session.scalars(db.select(cls).where(cls.upload_key==key)).first()
+
+def has_stale_night():
+    return db.session.execute(db.select(Device).where(Device.last_refreshed<Device.last_seen)).scalars().first()

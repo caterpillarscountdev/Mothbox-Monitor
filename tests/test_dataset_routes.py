@@ -95,4 +95,4 @@ def test_datasets_list_for_site_user_assigned(site_user_assigned, mocker, client
     assert res.status_code == 200
 
     assert f"<td>{night.night.strftime('%Y-%m-%d')}</td>"  in  res.text
-    
+        
