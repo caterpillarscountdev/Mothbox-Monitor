@@ -286,3 +286,11 @@ dl.config {
   grid-gap: 1rem;
   
 }
+
+.hide-children-control {
+    cursor: pointer;
+}
+
+.hidden-children * {
+    display: none;
+}

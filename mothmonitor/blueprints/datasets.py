@@ -119,7 +119,12 @@ def list_nights():
         ids = [x.id for x in current_user.site_devices]
         # restrict query to assigned devices
         select = select.join(Night.device).filter(Device.id.in_(ids))
-    
+
+    filters = { k: request.args.get(k) for k in request.args.keys() if k.startswith("f_") }
+    if filters:
+        if filters.get("f_attract", "2"):
+            select = select.filter(Night.config[("schedule", "attracttwo")].as_string().in_(["1","true"]))
+    print(select)
     nights = db.paginate(select, per_page=20, error_out=False)
 
     if nights.page != 1 and len(nights.items) == 0:

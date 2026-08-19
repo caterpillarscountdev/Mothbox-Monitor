@@ -96,3 +96,15 @@ def test_datasets_list_for_site_user_assigned(site_user_assigned, mocker, client
 
     assert f"<td>{night.night.strftime('%Y-%m-%d')}</td>"  in  res.text
     
+
+def test_datasets_list_filter_by_attract(admin_client, mocker, night, night_2, night_3):
+    c = make_boto_mock(mocker)
+        
+    res = admin_client.get('/datasets/list?f_attract=2')
+
+    assert res.status_code == 200
+
+    assert f"<td>{night.night.strftime('%Y-%m-%d')}</td>"  in  res.text
+    assert f"<td>{night_2.night.strftime('%Y-%m-%d')}</td>"  not in  res.text
+    assert f"<td>{night_3.night.strftime('%Y-%m-%d')}</td>"  in  res.text
+    

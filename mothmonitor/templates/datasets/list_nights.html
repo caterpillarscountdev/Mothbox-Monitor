@@ -13,6 +13,50 @@
 
 {% block content %}
 <h2>Data Collection Nights</h2>
+<form action="" method="GET" class="pure-form">
+<table class="pure-table pure-table-horizontal hide-children-control">
+  <thead>
+    <tr>
+      <th>Filter Nights</th>
+      <th><span>&#x2192;</span></th>
+    </tr>
+  </thead>
+  <tbody class="hide-children {% if not request.args.f_min_photos %}hidden-children{% endif%}">
+    <tr>
+      <td colspan="2">
+        <p>
+          <label for="f_station">Station:</label>
+          <select name="f_station">
+            <option value="1">Station</option>
+          </select>
+
+          <label for="f_attract">Attract Lights</label>
+          <select name="f_attract">
+            <option value="1">One</option>
+            <option value="2">Two</option>
+          </select>
+
+          <label for="f_sessions">Number of sessions:</label>
+          <select name="f_sessions">
+            <option value="1">One</option>
+            <option value="2">Two</option>
+          </select>
+        </p>
+        <p>
+          <label for="f_min_photos">At least
+            <input name="f_min_photos" type="text" size="3" value="0" />
+            photos.</label>
+            <label for="f_min_hours">At least
+              <input name="f_min_hours" type="text" size="3" value="0" />
+              hours.</label>
+          <input type="submit" class="pure-button" style="margin-left: 2em" value="Filter" />
+        </p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</form>
+<p></p>
 <table class="pure-table pure-table-horizontal">
   <thead>
     <tr>
@@ -25,28 +69,7 @@
     </tr>
   </thead>
   <tbody>
-    {% set previous = namespace(device=None) %}
-    {% for night in nights %}
-    <tr>
-      <td>{% if night.device != previous.device %}{{night.device.label or night.device.name}}{% endif %}</td>
-      <td>{{night.night}}</td>
-      <td>{{night.last_modified|format_datetime("datetime")}}</td>
-      <td>
-        {% if night.config %}
-        <span data-title="{{night.config|config_schedule('full')|striptags}}">{{ night.config|config_schedule("small")|safe }}</span>
-        {% endif %}
-      </td>
-      <td class="action"
-          hx-get="{{url_for('datasets.night_detail', night_id=night.id)}}"
-          hx-target="next tr"
-          hx-swap="outerHTML"
-      >{{night.photo_count}}</td>
-      <td>{% if night.device.antenna_deployment %}<a href="{{station_url(night.device.antenna_deployment)}}">See Station</a>{% endif %}</td>
-    </tr>
-    <tr></tr>
-    {% set previous.device = night.device %}
-    {% endfor %}
-
+    {% include "datasets/hx/night_rows.html" %}
   </tbody>
 </table>
 {{ render_pagination(nights) }}

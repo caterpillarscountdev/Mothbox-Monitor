@@ -1,0 +1,21 @@
+{% set previous = namespace(device=None) %}
+{% for night in nights %}
+<tr>
+  <td>{% if night.device != previous.device %}{{night.device.label or night.device.name}}{% endif %}</td>
+  <td>{{night.night}}</td>
+  <td>{{night.last_modified|format_datetime("datetime")}}</td>
+  <td>
+    {% if night.config %}
+    <span data-title="{{night.config|config_schedule('full')|striptags}}">{{ night.config|config_schedule("small")|safe }}</span>
+    {% endif %}
+  </td>
+  <td class="action"
+      hx-get="{{url_for('datasets.night_detail', night_id=night.id)}}"
+      hx-target="next tr"
+      hx-swap="outerHTML"
+  >{{night.photo_count}}</td>
+  <td>{% if night.device.antenna_deployment %}<a href="{{station_url(night.device.antenna_deployment)}}">See Station</a>{% endif %}</td>
+</tr>
+<tr></tr>
+{% set previous.device = night.device %}
+{% endfor %}
