@@ -47,7 +47,7 @@
             <input name="f_min_photos" type="text" size="2" value="{{request.args.f_min_photos|default('0')}}" />
             photos.</label>
             <label for="f_min_hours" style="margin-left: 1em;" style="margin-left: 1em;">At least
-              <input name="f_min_hours" type="text" size="2" value="0" />
+              <input name="f_min_hours" type="text" size="2" value="{{request.args.f_min_hours|default('0')}}" />
               hours.</label>
               <input type="submit" style="margin-left: 2em" value="Filter" />
               <a class="button" href="./list">Reset</a>
