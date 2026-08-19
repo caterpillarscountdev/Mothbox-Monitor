@@ -6,7 +6,7 @@
   >{{ device.name }}</td>
   <td>{{ device.label or ""}}</td>
   <td>{% for u in device.site_users %}<div>{{ u.name}}</div>{%endfor %}</td>
-  <td>{{device.antenna_deployment}} {% if device.antenna_last_synced %}({{device.antenna_last_synced|format_datetime}}){% endif %}</td>
+  <td>{{device.antenna_deployment_name or device.antenna_deployment}} {% if device.antenna_last_synced %}({{device.antenna_last_synced|format_datetime}}){% endif %}</td>
   <td>{{ device.last_seen|format_datetime("datetime", utc=False) }}</td>
   <td>{{ device.upload_key }}</td>
   <td><button class="action"
