@@ -7,7 +7,7 @@
 <a href="?sort={{field}}&asc={{ rev }}" style="color:">{{label}}</a>
 
 {% if sort==field %}
- {% if sort_asc %}&#x2193;{% else %}&#x2191;{% endif %}
+{% if sort_asc %}&#x2193;{% else %}&#x2191;{% endif %}
 {% endif %}
 {% endmacro %}
 
@@ -18,38 +18,39 @@
   <thead>
     <tr>
       <th>Filter Nights</th>
-      <th><span>&#x2192;</span></th>
+      <th>
+        <span>&#x2192;</span>
+      </th>
     </tr>
   </thead>
-  <tbody class="hide-children {% if not request.args.f_min_photos %}hidden-children{% endif%}">
+  <tbody class="pure-form hide-children {% if not request.args.f_min_photos %}hidden-children{% endif%}">
     <tr>
       <td colspan="2">
         <p>
-          <label for="f_station">Station:</label>
-          <select name="f_station">
-            <option value="1">Station</option>
-          </select>
-
-          <label for="f_attract">Attract Lights</label>
+          <label for="f_attract">Attract Lights:</label>
           <select name="f_attract">
-            <option value="1">One</option>
-            <option value="2">Two</option>
+            <option value="">(Any)</option>
+            <option value="1" {% if request.args.f_attract=="1" %}selected{% endif%}>One</option>
+            <option value="2" {% if request.args.f_attract=="2" %}selected{% endif%}>Two</option>
           </select>
 
-          <label for="f_sessions">Number of sessions:</label>
+          <label for="f_sessions" style="margin-left: 1em;">Number of sessions:</label>
           <select name="f_sessions">
-            <option value="1">One</option>
-            <option value="2">Two</option>
+            <option value="">(Any)</option>
+            <option value="1" {% if request.args.f_sessions=="1" %}selected{% endif%}>One</option>
+            <option value="2" {% if request.args.f_sessions=="2" %}selected{% endif%}>Two</option>
+            <option value="3" {% if request.args.f_sessions=="3" %}selected{% endif%}>Three</option>
           </select>
         </p>
         <p>
           <label for="f_min_photos">At least
-            <input name="f_min_photos" type="text" size="3" value="0" />
+            <input name="f_min_photos" type="text" size="2" value="{{request.args.f_min_photos|default('0')}}" />
             photos.</label>
-            <label for="f_min_hours">At least
-              <input name="f_min_hours" type="text" size="3" value="0" />
+            <label for="f_min_hours" style="margin-left: 1em;" style="margin-left: 1em;">At least
+              <input name="f_min_hours" type="text" size="2" value="0" />
               hours.</label>
-          <input type="submit" class="pure-button" style="margin-left: 2em" value="Filter" />
+              <input type="submit" style="margin-left: 2em" value="Filter" />
+              <a class="button" href="./list">Reset</a>
         </p>
       </td>
     </tr>

@@ -178,11 +178,14 @@ form dd {
     padding-right: 2rem;
 }
 
-form .save, form input[type=submit], form input[type=file], button {
+form .save, form input[type=submit], form input[type=file], button, .button {
     background-color: var(--button-color);
     padding: 0.5rem;
     border: 1px solid var(--button-border-color);
     border-radius: 0.5rem;
+    text-decoration: none;
+    color: var(--text-color);
+    font-weight: normal;
 }
 
 form .save, button.save {
