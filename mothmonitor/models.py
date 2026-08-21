@@ -70,6 +70,8 @@ class Device(db.Model):
 
     antenna_deployment: Mapped[Optional[int]] = mapped_column(nullable=True)
     antenna_last_synced: Mapped[datetime.datetime] = mapped_column(nullable=True)
+    antenna_deployment_name: Mapped[Optional[str]] = mapped_column(nullable=True)
+    storage_subdir: Mapped[Optional[str]] = mapped_column(nullable=True)
     
     nights: Mapped[List["Night"]] = relationship(back_populates="device")
 

@@ -4,6 +4,10 @@
 >
   <td colspan="6">
     <dl class="config">
+      <dt>Storage Subdir</dt>
+      <dd>
+        {{ device.storage_subdir or device.name}}
+      </dd>
       <dt>Site Name</dt>
       <dd>
         {% if config.metadata %}

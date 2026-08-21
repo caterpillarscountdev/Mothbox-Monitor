@@ -14,6 +14,7 @@ def create_app(testing=False, redis_connection=None):
     app.config["SECRET_KEY"] = os.environ.get("APP_SECRET_KEY", 'notverysecretindev')
     app.config["SQLALCHEMY_DATABASE_URI"] = database.connection_string
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config["SQLALCHEMY_ECHO"] = os.environ.get("SQL_ECHO", False)
     
     app.config["REMEMBER_COOKIE_SAMESITE"] = "strict"
     app.config["SESSION_COOKIE_SAMESITE"] = "strict"

@@ -51,7 +51,6 @@ def check_manifest():
     files = body["files"]
     # files = [{"filename": "", "size": 0, "type": "image/jpeg"}]
 
-    prefix = s3_prefix(device, night)
     seen = datetime.now()
 
     # Ensure a device record exists for this upload
@@ -65,7 +64,10 @@ def check_manifest():
         if not d:
             d = Device(name=device, last_seen=seen)
             db.session.add(d)
+        valid_device = d
     db.session.commit()
+
+    prefix = s3_prefix(valid_device.storage_subdir or device, night)
 
     def check_key(filename, key, size):
         key = f"{prefix}/{filename}"

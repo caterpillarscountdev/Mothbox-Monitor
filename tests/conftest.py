@@ -127,7 +127,45 @@ def device_3(app):
     
 @pytest.fixture()
 def night(app, device):
-    n = models.Night(night=date(2025,12,30), device_id=device.id)
+    n = models.Night(night=date(2025,12,30), device_id=device.id,
+                     photo_count=4,
+                     config={"schedule":
+                             {"hour": "1;3",
+                              "minute": 0,
+                              "weekday": "0;2;4",
+                              "camera_interval": 10,
+                              "attracttwo": "1",
+                              "runtime": 120}})                     
+    database.db.session.add(n)
+    database.db.session.commit()
+    yield n
+    
+@pytest.fixture()
+def night_2(app, device):
+    n = models.Night(night=date(2025,12,29), device_id=device.id,
+                     photo_count=2,
+                     config={"schedule":
+                             {"hour": "1;2",
+                              "minute": 0,
+                              "weekday": "0;2;4",
+                              "camera_interval": 10,
+                              "attracttwo": "0",
+                              "runtime": 120}})
+    database.db.session.add(n)
+    database.db.session.commit()
+    yield n
+    
+@pytest.fixture()
+def night_3(app, device):
+    n = models.Night(night=date(2025,12,28), device_id=device.id,
+                     photo_count=1,
+                     config={"schedule":
+                             {"hour": "1",
+                              "minute": 0,
+                              "weekday": "0;2;4",
+                              "camera_interval": 10,
+                              "attracttwo": "1",
+                              "runtime": 60}})
     database.db.session.add(n)
     database.db.session.commit()
     yield n

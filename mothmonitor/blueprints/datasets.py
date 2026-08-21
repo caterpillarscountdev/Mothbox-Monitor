@@ -1,11 +1,21 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
-from flask_security import auth_required, current_user
+from flask_security import permissions_required, auth_required, current_user
 
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, attributes
+
+import copy
+import json
+import boto3
+from botocore.exceptions import ClientError
+from datetime import datetime
+import dateutil
+import mimetypes
+from NamedAtomicLock import NamedAtomicLock
 
 from ..models import db, Device, Night, has_stale_night
+
 from .. import antenna
-from ..s3_storage import S3Reader, enqueue_refresh_nights
+from ..s3_storage import S3Reader, enqueue_refresh_nights, config_parsed
 
 
 datasets = Blueprint('datasets', __name__)
@@ -52,7 +62,18 @@ def list_nights():
         ids = [x.id for x in current_user.site_devices]
         # restrict query to assigned devices
         select = select.join(Night.device).filter(Device.id.in_(ids))
-    
+
+    filters = { k: request.args.get(k) for k in request.args.keys() if k.startswith("f_") }
+    if filters:
+        if filters.get("f_attract"):
+            select = select.filter(Night.config[("parsed", "attracts")].as_integer() == int(filters.get("f_attract")))
+        if filters.get("f_sessions"):
+            select = select.filter(Night.config[("parsed", "num_hours")].as_integer() == int(filters.get("f_sessions")))
+        if filters.get("f_min_hours"):
+            select = select.filter(Night.config[("parsed", "total_hours")].as_float() >= float(filters.get("f_min_hours")))
+        if filters.get("f_min_photos"):
+            select = select.filter(Night.photo_count >= int(filters.get("f_min_photos")))
+
     nights = db.paginate(select, per_page=20, error_out=False)
 
     if nights.page != 1 and len(nights.items) == 0:
@@ -61,3 +82,12 @@ def list_nights():
     return render_template("datasets/list_nights.html", nights=nights, sort=sort, sort_asc=sort_asc, station_url=antenna.station_url)
 
 
+@datasets.route("/_migrate/config_parsed")
+@permissions_required("admin")
+def migrate_config_parsed():
+
+    for night in db.session.execute(db.select(Night)).scalars():
+        night.config = config_parsed(night.config or {})
+        attributes.flag_modified(night, "config")
+    db.session.commit()
+    return "ok"
