@@ -96,3 +96,74 @@ def test_datasets_list_for_site_user_assigned(site_user_assigned, mocker, client
 
     assert f"<td>{night.night.strftime('%Y-%m-%d')}</td>"  in  res.text
     
+
+def test_datasets_list_filter_by_attract(admin_client, mocker, night, night_2, night_3):
+    c = make_boto_mock(mocker)
+    # transient test condition for migrating
+    res = admin_client.get('/datasets/_migrate/config_parsed')
+        
+    res = admin_client.get('/datasets/list?f_attract=2')
+
+    assert res.status_code == 200
+
+    assert f"<td>{night.night.strftime('%Y-%m-%d')}</td>"  in  res.text
+    assert f"<td>{night_2.night.strftime('%Y-%m-%d')}</td>"  not in  res.text
+    assert f"<td>{night_3.night.strftime('%Y-%m-%d')}</td>"  in  res.text
+
+def test_datasets_list_filter_by_sessions(admin_client, mocker, night, night_2, night_3):
+    c = make_boto_mock(mocker)
+    # transient test condition for migrating
+    res = admin_client.get('/datasets/_migrate/config_parsed')
+        
+    res = admin_client.get('/datasets/list?f_sessions=2')
+
+    assert res.status_code == 200
+
+    assert f"<td>{night.night.strftime('%Y-%m-%d')}</td>"  in  res.text
+    assert f"<td>{night_2.night.strftime('%Y-%m-%d')}</td>"  in  res.text
+    assert f"<td>{night_3.night.strftime('%Y-%m-%d')}</td>" not in  res.text
+
+def test_datasets_list_filter_by_hours(admin_client, mocker, night, night_2, night_3):
+    c = make_boto_mock(mocker)
+    # transient test condition for migrating
+    res = admin_client.get('/datasets/_migrate/config_parsed')
+        
+    res = admin_client.get('/datasets/list?f_min_hours=2')
+
+    assert res.status_code == 200
+
+    assert f"<td>{night.night.strftime('%Y-%m-%d')}</td>"  in  res.text
+    assert f"<td>{night_2.night.strftime('%Y-%m-%d')}</td>"  in  res.text
+    assert f"<td>{night_3.night.strftime('%Y-%m-%d')}</td>" not in  res.text
+    
+def test_datasets_list_filter_by_photos(admin_client, mocker, night, night_2, night_3):
+    c = make_boto_mock(mocker)
+    # transient test condition for migrating
+    res = admin_client.get('/datasets/_migrate/config_parsed')
+        
+    res = admin_client.get('/datasets/list?f_min_photos=3')
+
+    assert res.status_code == 200
+
+    assert f"<td>{night.night.strftime('%Y-%m-%d')}</td>"  in  res.text
+    assert f"<td>{night_2.night.strftime('%Y-%m-%d')}</td>" not in  res.text
+    assert f"<td>{night_3.night.strftime('%Y-%m-%d')}</td>" not in  res.text
+    
+
+def test_migrate_config_parsed(admin_client, night, night_2):
+    res = admin_client.get('/datasets/_migrate/config_parsed')
+
+    assert res.status_code == 200
+    nights = list(db.session.execute(db.select(Night).order_by(Night.id)).scalars())
+    assert len(nights) == 2
+    assert nights[0].config.get("parsed")
+    assert nights[0].config["parsed"]["num_hours"] == 2
+    assert nights[0].config["parsed"]["num_days"] == 3
+    assert nights[0].config["parsed"]["attracts"] == 2
+    assert nights[0].config["parsed"]["total_hours"] == 4.0
+    
+    assert nights[1].config.get("parsed")
+    assert nights[1].config["parsed"]["num_hours"] == 2
+    assert nights[1].config["parsed"]["num_days"] == 3
+    assert nights[1].config["parsed"]["attracts"] == 1
+    assert nights[1].config["parsed"]["total_hours"] == 4.0

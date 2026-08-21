@@ -16,7 +16,7 @@ def config_schedule(config, format="full"):
     if type(config) is str:
         config = json.loads(config)
     
-    if config and config["schedule"]:
+    if config and config.get("schedule"):
         days = [days_of_week[int(x)-1] for x in config["schedule"]["weekday"].split(";")]
         hours = [f'{int(x):02}:{int(config["schedule"]["minute"]):02}' for x in config["schedule"]["hour"].split(";")]
         runtime = config["schedule"]["runtime"]
