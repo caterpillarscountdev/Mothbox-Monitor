@@ -97,7 +97,7 @@ class S3Reader:
                     night.photo_count = photo_count
                     night.last_modified = last_modified
                     night.last_photo = last_photo
-                    night.config = config
+                    night.config = config_parsed(config)
 
                     nights.append(night)
             db.session.commit()
