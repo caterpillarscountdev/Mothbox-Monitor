@@ -10,7 +10,6 @@ from botocore.exceptions import ClientError
 from datetime import datetime
 import dateutil
 import mimetypes
-from NamedAtomicLock import NamedAtomicLock
 
 from ..models import db, Device, Night, has_stale_night
 
