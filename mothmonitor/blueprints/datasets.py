@@ -37,13 +37,13 @@ def list_nights():
     forced_refresh = request.args.get('refresh')
     if forced_refresh or has_stale_night():
          enqueue_refresh_nights(forced_refresh=forced_refresh)
-
-    try:
-        syncs = antenna.enqueue_sync_stale_deployments()    
-        if len(syncs):
-            flash(f"Syncing {len(syncs)} stations on Antenna", "ok")
-    except antenna.APIError as e:
-        flash(f"{e}", "error")
+    else:
+        try:
+            syncs = antenna.enqueue_sync_stale_deployments()    
+            if len(syncs):
+                flash(f"Syncing {len(syncs)} stations on Antenna", "ok")
+        except antenna.APIError as e:
+            flash(f"{e}", "error")
          
     sort = request.args.get('sort', 'last_modified')
     sort_asc = request.args.get('asc', False)
