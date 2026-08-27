@@ -31,9 +31,13 @@ def create_app(testing=False, redis_connection=None):
     app.config["TESTING"] = testing
     app.testing = True
 
+    os_redis = os.environ.get('REDIS_SERVICE_HOST', None)
     if redis_connection:
         app.config["RQ_CONNECTION"] = redis_connection
-    
+    elif os_redis:
+        app.config["RQ_CONNECTION"] = f'redis://{os_redis}:6379/0'
+        
+        
     mail = Mail(app)
     database.init_app(app)
     auth.init_app(app)
