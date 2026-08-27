@@ -37,7 +37,7 @@ def create_app(testing=False, redis_connection=None):
     app.config["SECURITY_EMAIL_PLAINTEXT"] = False
     
     app.config["TESTING"] = testing
-    app.testing = True
+    app.testing = testing
 
     os_redis = os.environ.get('REDIS_SERVICE_HOST', None)
     if redis_connection:
