@@ -43,7 +43,8 @@ def create_app(testing=False, redis_connection=None):
     if redis_connection:
         app.config["RQ_CONNECTION"] = redis_connection
     elif os_redis:
-        app.config["RQ_CONNECTION"] = f'redis://{os_redis}:6379/0'
+        app.config["RQ_CONNECTION"] = f'redis://{os_redis}:6379/'
+    print("RQ_CONNECTION", app.config["RQ_CONNECTION"])
         
         
     mail = Mail(app)
