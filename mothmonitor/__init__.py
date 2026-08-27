@@ -2,11 +2,19 @@ import os
 
 from datetime import timezone
 
-from flask import Flask
+from flask import Flask, redirect, url_for
 from flask_mail import Mail
+from flask_security import current_user
 from flask_rq import RQ
+import rq_dashboard
 
 from . import database, auth, jobs
+
+@rq_dashboard.blueprint.before_request
+def restrict_to_admins():
+    if current_user.is_anonymous or not current_user.can("admin"):
+        return redirect(url_for('main.index'))
+
 
 def create_app(testing=False, redis_connection=None):
     app = Flask(__name__)
@@ -43,6 +51,11 @@ def create_app(testing=False, redis_connection=None):
     auth.init_app(app)
     jobs.init_app(app)
 
+    
+    app.config["RQ_DASHBOARD_REDIS_URL"] = app.config.get("RQ_CONNECTION", "redis:///")
+    rq_dashboard.web.setup_rq_connection(app)
+    app.register_blueprint(rq_dashboard.blueprint, url_prefix="/_rq")
+    
     from .blueprints import main, users, upload, devices, datasets
     
     app.register_blueprint(main.main)
