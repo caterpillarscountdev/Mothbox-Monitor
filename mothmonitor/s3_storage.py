@@ -112,7 +112,7 @@ def enqueue_refresh_nights(**kwargs):
     
 def config_parsed(config):
     '''Parse some of the config to be queryable in JSON'''
-    cfg = config["parsed"] = {}
+    cfg = config.get("parsed", {})
     if not config.get("schedule"):
         return config
     cfg["days"] = [int(x) for x in config["schedule"]["weekday"].split(";")]
@@ -123,4 +123,5 @@ def config_parsed(config):
     cfg["num_hours"] = len(cfg["hours"])
     cfg["num_days"] = len(cfg["days"])
     cfg["total_hours"] = len(cfg["hours"])*config["schedule"]["runtime"]/60
+    config["parsed"] = cfg
     return config
