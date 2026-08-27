@@ -46,8 +46,6 @@ def create_app(testing=False, redis_connection=None):
         os_redis_port = os.environ.get("REDIS_SERVICE_PORT", "6379")
         os_redis_password = os.environ.get("REDIS_PASSWORD", "")
         app.config["RQ_CONNECTION"] = f'redis://:{os_redis_password}@{os_redis}:{os_redis_port}/0'
-    print("RQ_CONNECTION", app.config["RQ_CONNECTION"])
-        
         
     mail = Mail(app)
     database.init_app(app)
