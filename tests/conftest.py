@@ -3,12 +3,49 @@ from mothmonitor import create_app, models, database
 from flask_login import FlaskLoginClient
 from datetime import date
 
+import subprocess
+import time
+
+import ephemeral_port_reserve
+import pytest
+from redis import Redis
+from redis.exceptions import ConnectionError as RedisConnectionError
+
+@pytest.fixture(scope="session")
+def redis_port() -> int:
+    return ephemeral_port_reserve.reserve()  # type: ignore[no-any-return]
+
+@pytest.fixture(scope="session", autouse=True)
+def _start_redis(tmp_path_factory, redis_port):
+    proc = subprocess.Popen(
+        ["redis-server", "--port", str(redis_port)],
+        cwd=tmp_path_factory.mktemp("redis-server"),
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+
+    while True:
+        try:
+            redis = Redis(port=redis_port, single_connection_client=True)
+            redis.ping()
+            break
+        except (ConnectionError, RedisConnectionError):  # pragma: no cover
+            time.sleep(0.1)
+
+    yield
+    proc.terminate()
+    proc.wait()
+
+@pytest.fixture(autouse=True)
+def _reset_redis(redis_port):
+    yield
+    Redis(port=redis_port, single_connection_client=True).flushall()    
 
 @pytest.fixture()
-def app(requests_mock, mocker):
+def app(requests_mock, mocker, redis_port):
     mocker.patch("boto3.client")
     database.connection_string = "sqlite:///:memory:"
-    app = create_app(testing=True)
+    app = create_app(testing=True, redis_connection=f"redis://127.0.0.1:{redis_port}/0")
     app.config.update(
         TESTING= True,
         SECRET_KEY="test_secret_key_123",  # Use a secure key in real tests
@@ -137,3 +174,4 @@ def night_3(app, device):
 def mailer(app):
     with app.extensions['mail'].record_messages() as outbox:
         yield outbox
+

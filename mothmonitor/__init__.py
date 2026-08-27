@@ -2,12 +2,21 @@ import os
 
 from datetime import timezone
 
-from flask import Flask
+from flask import Flask, redirect, url_for
 from flask_mail import Mail
+from flask_security import current_user
+from flask_rq import RQ
+import rq_dashboard
 
-from . import database, auth
+from . import database, auth, jobs
 
-def create_app(testing=False):
+@rq_dashboard.blueprint.before_request
+def restrict_to_admins():
+    if current_user.is_anonymous or not current_user.can("admin"):
+        return redirect(url_for('main.index'))
+
+
+def create_app(testing=False, redis_connection=None):
     app = Flask(__name__)
     #app.config["EXPLAIN_TEMPLATE_LOADING"] = True
     app.config["SECRET_KEY"] = os.environ.get("APP_SECRET_KEY", 'notverysecretindev')
@@ -28,12 +37,26 @@ def create_app(testing=False):
     app.config["SECURITY_EMAIL_PLAINTEXT"] = False
     
     app.config["TESTING"] = testing
-    
+    app.testing = testing
+
+    os_redis = os.environ.get('REDIS_SERVICE_HOST', None)
+    if redis_connection:
+        app.config["RQ_CONNECTION"] = redis_connection
+    elif os_redis:
+        os_redis_port = os.environ.get("REDIS_SERVICE_PORT", "6379")
+        os_redis_password = os.environ.get("REDIS_PASSWORD", "")
+        app.config["RQ_CONNECTION"] = f'redis://:{os_redis_password}@{os_redis}:{os_redis_port}/0'
+        
     mail = Mail(app)
     database.init_app(app)
     auth.init_app(app)
+    jobs.init_app(app)
 
-
+    
+    app.config["RQ_DASHBOARD_REDIS_URL"] = app.config.get("RQ_CONNECTION", "redis:///")
+    rq_dashboard.web.setup_rq_connection(app)
+    app.register_blueprint(rq_dashboard.blueprint, url_prefix="/_rq")
+    
     from .blueprints import main, users, upload, devices, datasets
     
     app.register_blueprint(main.main)
