@@ -97,7 +97,7 @@ class S3Reader:
                     config = self.get_night_metadata_json(device_name, night_name)
                     night_date = dateutil.parser.parse(night_name).date()
                     night = db.session.scalar(
-                        db.select(Night).filter((Night.night==night_date) &
+                        db.select(Night).join(Night.device).filter((Night.night==night_date) &
                                                 ((Device.id==device.id) | (Device.name==device_name)))
                     )
                     if not night:
