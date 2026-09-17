@@ -54,6 +54,7 @@ def test_device_edit_post(admin_client, device, requests_mock):
     assert res.status_code < 300
     d = db.session.execute(db.select(Device)).scalar()
     assert d.label == 'Green Giant'
+    assert d.retired == None
     
 def test_device_edit_post_with_antenna(admin_client, device, requests_mock):
     a_url = f"/api/v2/deployments/1/"
@@ -170,3 +171,15 @@ def test_device_check_config_with_updates_applied(client, device):
     assert "updated_config" not in res.json
     assert device.updated_config == None
     
+def test_device_retire(admin_client, device, requests_mock):
+    res = admin_client.post(f'/devices/retire/{device.id}', data={})
+    assert res.status_code < 300
+    d = db.session.execute(db.select(Device)).scalar()
+    assert d.retired != None
+
+def test_device_unretire(admin_client, device, requests_mock):
+    res = admin_client.post(f'/devices/retire/{device.id}/unretire', data={})
+    assert res.status_code < 300
+    d = db.session.execute(db.select(Device)).scalar()
+    assert d.retired == None
+

@@ -18,10 +18,32 @@
                   hx-target="next tbody"
                   hx-swap="afterbegin"
           >+</button></th>
+      <th></th>
     </tr>
   </thead>
-  <tbody>
+  <tbody id="device_tbody" hx-swap-oob="true">
     {% for device in devices %}
+    {% include "devices/hx/row.html" %}
+    {% endfor %}
+  </tbody>
+</table>
+
+<h2>Retired Devices</h2>
+<table class="pure-table pure-table-horizontal">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Label</th>
+      <th>Site Users</th>
+      <th>Antenna Station</th>
+      <th>Last Seen</th>
+      <th>Upload Key</th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody id="device_retired_tbody" hx-swap-oob="true">
+    {% for device in retired_devices %}
     {% include "devices/hx/row.html" %}
     {% endfor %}
   </tbody>

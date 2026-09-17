@@ -81,6 +81,18 @@ class Device(db.Model):
         secondary=user_site_devices, back_populates="site_devices"
     )    
 
+    @classmethod
+    def select_retired(cls, retired=True):
+        if retired:
+            op = cls.retired != None
+        else:
+            op = cls.retired == None
+        return db.select(cls).filter(op)
+
+    @classmethod
+    def select_active(cls):
+        return cls.select_retired(False)
+    
     def generate_upload_key(self):
         if self.upload_key:
             keys = self.former_keys and [self.former_keys] or []
@@ -89,6 +101,11 @@ class Device(db.Model):
         self.upload_key = secrets.token_hex(16)
         return self.upload_key
 
+    def retire(self, retired=True):
+        if retired:
+            self.retired = datetime.datetime.now()
+        else:
+            self.retired = None
 
     @classmethod
     def check_device_key(cls, key):
