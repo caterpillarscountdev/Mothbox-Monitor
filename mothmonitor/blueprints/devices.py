@@ -32,7 +32,8 @@ def config_schedule(config, format="full"):
 @devices.route('/list')
 @auth_required()
 def list_devices():
-    devices = db.session.execute(db.select(Device).order_by(Device.id)).scalars()
+    devices = db.session.execute(Device.select_active().order_by(Device.id)).scalars()
+    retired_devices = db.session.execute(Device.select_retired().order_by(Device.id)).scalars()
     return render_template("devices/list.html", **locals())
 
 @devices.route('/show/<device_id>')
@@ -110,6 +111,16 @@ def create_key(device_id):
     device.generate_upload_key()
     db.session.commit()
     return render_template("devices/hx/row.html", **locals())
+
+@devices.route('/retire/<device_id>', defaults={"un": False}, methods=["POST"])
+@devices.route('/retire/<device_id>/un<un>', methods=["POST"])
+@permissions_required("admin")
+def retire(device_id, un):
+    device = db.get_or_404(Device, device_id)
+    device.retire(not un)
+    db.session.commit()
+    return list_devices()
+
 
 @devices.route('/check_config', methods=["POST"])
 @cross_origin()

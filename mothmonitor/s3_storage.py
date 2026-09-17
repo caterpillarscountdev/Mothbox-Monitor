@@ -76,7 +76,11 @@ class S3Reader:
         try:
             devices = self.get_devices()
             for device_name in sorted(devices):
-                device = db.get_or_create(Device, name=device_name)
+                device = db.session.scalar(
+                    Device.select_active().filter_by(storage_subdir=device_name)
+                )
+                if not device:
+                    device = db.get_or_create(Device, name=device_name, retired=None)
                 device.last_refreshed = datetime.now()
                 n = self.get_device_nights(device_name)
                 for night_name in sorted(n, reverse=True):
