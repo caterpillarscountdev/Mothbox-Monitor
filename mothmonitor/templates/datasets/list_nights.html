@@ -4,7 +4,7 @@
 
 {% macro sort_column(label, field) %}
 {% set rev = sort==field and not sort_asc and "1" or "" %}
-<a href="?sort={{field}}&asc={{ rev }}" style="color:">{{label}}</a>
+<a href="?sort={{field}}&asc={{ rev }}{% if request.args.f_attract %}&f_attract={{request.args.f_attract}}{% endif %}{% if request.args.f_station %}&f_station={{request.args.f_station}}{% endif %}{% if request.args.f_sessions %}&f_sessions={{request.args.f_sessions}}{% endif %}{% if request.args.f_min_photos %}&f_min_photos={{request.args.f_min_photos}}{% endif %}{% if request.args.f_min_hours %}&f_attract={{request.args.f_min_hours}}{% endif %}" style="color:">{{label}}</a>
 
 {% if sort==field %}
 {% if sort_asc %}&#x2193;{% else %}&#x2191;{% endif %}
