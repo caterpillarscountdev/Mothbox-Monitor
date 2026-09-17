@@ -43,6 +43,15 @@
           </select>
         </p>
         <p>
+          <label for="f_station">Station:</label>
+          <select name="f_station">
+            <option value="">(Any)</option>
+            {% for station in stations %}
+            <option value="{{station.id}}" {% if request.args.f_station==station.id %}selected{% endif%}>{{station.name}}</option>
+            {% endfor %}
+          </select>
+        </p>
+        <p>
           <label for="f_min_photos">At least
             <input name="f_min_photos" type="text" size="2" value="{{request.args.f_min_photos|default('0')}}" />
             photos.</label>
