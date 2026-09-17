@@ -62,6 +62,8 @@ class Device(db.Model):
     last_seen: Mapped[datetime.datetime] = mapped_column(nullable=True)
     last_refreshed: Mapped[datetime.datetime] = mapped_column(nullable=True)
 
+    retired: Mapped[datetime.datetime] = mapped_column(nullable=True)
+    
     code_version: Mapped[Optional[str]] = mapped_column(nullable=True)
     recent_logs: Mapped[Optional[JSON]] = mapped_column(type_=JSON, nullable=True)
 
