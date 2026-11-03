@@ -141,8 +141,8 @@ def download():
             }
         # sampled hours
         hours = config.get("hours", [])
-        minute = n.config.get("schedule", {}).get("minute", 0)
-        runtime_extent = (minute + n.config.get("schedule", {}).get("runtime", 0))
+        minute = int(n.config.get("schedule", {}).get("minute", 0))
+        runtime_extent = minute + int(n.config.get("schedule", {}).get("runtime", 0))
         def compute_hour_min(hr):
             if hr in hours:
                 return 60-minute
