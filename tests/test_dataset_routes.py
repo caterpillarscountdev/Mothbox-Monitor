@@ -253,6 +253,6 @@ def test_datasets_download_from_db(admin_client, mocker, night):
     assert "device_id" in output[0]
     assert "attract_lights" in output[0]
     assert "hours_total" in output[0]
-    assert night.night.strftime("%A, %b %Y") in output[1]
+    assert "Tuesday, Dec 30 2025" in output[1]
     
     
