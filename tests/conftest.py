@@ -130,12 +130,12 @@ def night(app, device):
     n = models.Night(night=date(2025,12,30), device_id=device.id,
                      photo_count=4,
                      config={"schedule":
-                             {"hour": "1;3",
-                              "minute": 0,
+                             {"hour": "22;2",
+                              "minute": 5,
                               "weekday": "0;2;4",
                               "camera_interval": 10,
                               "attracttwo": "1",
-                              "runtime": 120}})                     
+                              "runtime": 120}})
     database.db.session.add(n)
     database.db.session.commit()
     yield n

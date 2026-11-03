@@ -122,8 +122,8 @@ def download():
     nights_data = []
     for n in nights:
         config = n.config.get("parsed", {})
-        nights_data += [
-            {
+        
+        n_data = {
                 "device_id": n.device_id,
                 "device_label": n.device.label,
                 "night": n.night.strftime("%A, %b %-d %Y"),
@@ -136,7 +136,25 @@ def download():
                 "hours_total": config.get("total_hours"),
                 "antenna_station_id": n.device.antenna_deployment,
             }
-        ]
+        # sampled hours
+        hours = config.get("hours", [])
+        minute = n.config.get("schedule", {}).get("minute", 0)
+        runtime_extent = (minute + n.config.get("schedule", {}).get("runtime", 0))
+        def compute_hour_min(hr):
+            if hr in hours:
+                return 60-minute
+            x = runtime_extent - 60
+            rd = 1
+            while x > 0:
+                if hr in [(y+rd)%24 for y in hours]:
+                    return min(60, x)
+                rd = rd+1
+                x = x-60
+            return 0
+        for h in list(range(19,24)) + list(range(0,7)):
+            n_data[f"sampled_hour_{h}"] = compute_hour_min(h)
+        nights_data.append(n_data)
+
     headers = nights_data[0].keys()
     # stream the response as the data is generated
     response = Response(generate_csv(headers, nights_data), mimetype='text/csv')
