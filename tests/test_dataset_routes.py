@@ -237,3 +237,22 @@ def test_migrate_config_parsed(admin_client, night, night_2):
     assert nights[1].config["parsed"]["num_days"] == 3
     assert nights[1].config["parsed"]["attracts"] == 1
     assert nights[1].config["parsed"]["total_hours"] == 4.0
+
+
+def test_datasets_download_from_db(admin_client, mocker, night):
+    c = make_boto_mock(mocker)
+       
+    res = admin_client.get('/datasets/download')
+
+    assert res.status_code == 200
+    assert res.mimetype == 'text/csv'
+    assert "MMM_dataset" in res.headers["Content-disposition"]
+    print(res.headers["Content-disposition"])
+    assert res.is_streamed == True
+    output = res.text.splitlines()
+    assert "device_id" in output[0]
+    assert "attract_lights" in output[0]
+    assert "hours_total" in output[0]
+    assert night.night.strftime("%A, %b %Y") in output[1]
+    
+    

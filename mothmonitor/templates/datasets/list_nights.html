@@ -83,5 +83,6 @@
   </tbody>
 </table>
 {{ render_pagination(nights) }}
+<p><a href="{{ url_for('datasets.download', **request.args) }}" class="action">Download CSV</a></p>
 
 {% endblock %}

@@ -126,6 +126,8 @@ span[data-title]:hover > * { user-select: auto }
     border: 1px solid var(--button-border-color);
     border-radius: 0.5rem;
     min-width: 1.5em;
+    color: var(--text-color);
+    text-decoration: none;
 }
 
 .pagination {

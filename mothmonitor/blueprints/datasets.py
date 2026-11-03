@@ -1,15 +1,11 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, Response
 from flask_security import permissions_required, auth_required, current_user
 
 from sqlalchemy.orm import joinedload, attributes
 
-import copy
-import json
-import boto3
-from botocore.exceptions import ClientError
+import csv
+from io import StringIO
 from datetime import datetime
-import dateutil
-import mimetypes
 
 from ..models import db, Device, Night, has_stale_night
 
@@ -27,26 +23,16 @@ def night_detail(night_id):
     if night.last_photo:
         last_photo_url = S3Reader().read_url(current_app.config['S3_BUCKET'], night.last_photo)
     return render_template("datasets/hx/detail_row.html", **locals())
-    
 
-
-@datasets.route('/list')
-@auth_required()
-def list_nights():
-    forced_refresh = request.args.get('refresh')
-    if forced_refresh or has_stale_night():
-         enqueue_refresh_nights(forced_refresh=forced_refresh)
-    else:
-        try:
-            syncs = antenna.enqueue_sync_stale_deployments()    
-            if len(syncs):
-                flash(f"Syncing {len(syncs)} stations on Antenna", "ok")
-        except antenna.APIError as e:
-            flash(f"{e}", "error")
-         
+def sort_args():
     sort = request.args.get('sort', 'last_modified')
     sort_asc = request.args.get('asc', False)
+    return sort, sort_asc
 
+def select_nights():
+
+    sort, sort_asc = sort_args()
+    
     select = db.select(Night).options(joinedload(Night.device))
     sorts = []
     if sort:
@@ -74,6 +60,26 @@ def list_nights():
             select = select.filter(Night.photo_count >= int(filters.get("f_min_photos")))
         if filters.get("f_station"):
             select = select.join(Night.device).filter(Device.antenna_deployment == int(filters.get("f_station")))
+    return select
+
+
+@datasets.route('/list')
+@auth_required()
+def list_nights():
+    forced_refresh = request.args.get('refresh')
+    if forced_refresh or has_stale_night():
+         enqueue_refresh_nights(forced_refresh=forced_refresh)
+    else:
+        try:
+            syncs = antenna.enqueue_sync_stale_deployments()    
+            if len(syncs):
+                flash(f"Syncing {len(syncs)} stations on Antenna", "ok")
+        except antenna.APIError as e:
+            flash(f"{e}", "error")
+         
+    sort, sort_asc = sort_args()
+
+    select = select_nights()
             
     nights = db.paginate(select, per_page=20, error_out=False)
 
@@ -86,6 +92,57 @@ def list_nights():
 
     return render_template("datasets/list_nights.html", nights=nights, sort=sort, sort_asc=sort_asc, station_url=antenna.station_url, stations=stations)
 
+def generate_csv(headers, dataset):
+    data = StringIO()
+    w = csv.writer(data)
+
+    def yield_clear():
+        d = data.getvalue()
+        data.seek(0)
+        data.truncate(0)
+        return d
+    
+    # write header
+    w.writerow(headers)
+    yield yield_clear()
+    
+    # write each item
+    for item in dataset:
+        row = [item[x] for x in headers]
+        w.writerow(row)
+        yield yield_clear()
+
+@datasets.route('/download')
+@auth_required()
+def download():
+    select = select_nights()
+
+    nights = db.session.execute(select).scalars()
+
+    nights_data = []
+    for n in nights:
+        config = n.config.get("parsed", {})
+        nights_data += [
+            {
+                "device_id": n.device_id,
+                "device_label": n.device.label,
+                "night": n.night.strftime("%A, %b %Y"),
+                "upload_date": n.last_modified and n.last_modified.strftime("%F") or "",
+                "photo_count": n.photo_count,
+                "attract_lights": config.get("attracts"),
+                "session_runtime": n.config.get("schedule", {}).get("runtime"),
+                "session_count": config.get("num_hours"),
+                "hours_total": config.get("total_hours"),
+                "antenna_station_id": n.device.antenna_deployment,
+            }
+        ]
+    headers = nights_data[0].keys()
+    # stream the response as the data is generated
+    response = Response(generate_csv(headers, nights_data), mimetype='text/csv')
+    # add a filename
+    filename = f"MMM_dataset_{datetime.now().strftime('%Y-%m-%d_%H-%M')}.csv"
+    response.headers.set("Content-Disposition", "attachment", filename=filename)
+    return response
 
 @datasets.route("/_migrate/config_parsed")
 @permissions_required("admin")
