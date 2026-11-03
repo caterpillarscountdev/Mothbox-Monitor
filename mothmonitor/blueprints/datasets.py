@@ -62,7 +62,7 @@ def list_nights():
         # restrict query to assigned devices
         select = select.join(Night.device).filter(Device.id.in_(ids))
 
-    filters = { k: request.args.get(k) for k in request.args.keys() if k.startswith("f_") }
+    filters = { k: request.args.get(k) for k in request.args.keys() if k.startswith("f_") and request.args.get(k) not in ("", None, "0") }
     if filters:
         if filters.get("f_attract"):
             select = select.filter(Night.config[("parsed", "attracts")].as_integer() == int(filters.get("f_attract")))
@@ -72,13 +72,19 @@ def list_nights():
             select = select.filter(Night.config[("parsed", "total_hours")].as_float() >= float(filters.get("f_min_hours")))
         if filters.get("f_min_photos"):
             select = select.filter(Night.photo_count >= int(filters.get("f_min_photos")))
-
+        if filters.get("f_station"):
+            select = select.join(Night.device).filter(Device.antenna_deployment == int(filters.get("f_station")))
+            
     nights = db.paginate(select, per_page=20, error_out=False)
 
+    stations = []
+    for d in db.session.execute(Device.select_active().filter(Device.antenna_deployment != None)).scalars():
+        stations.append({"id": str(d.antenna_deployment), "name": d.antenna_deployment_name})
+    
     if nights.page != 1 and len(nights.items) == 0:
         return redirect(url_for(request.endpoint, page=1))
 
-    return render_template("datasets/list_nights.html", nights=nights, sort=sort, sort_asc=sort_asc, station_url=antenna.station_url)
+    return render_template("datasets/list_nights.html", nights=nights, sort=sort, sort_asc=sort_asc, station_url=antenna.station_url, stations=stations)
 
 
 @datasets.route("/_migrate/config_parsed")

@@ -4,7 +4,7 @@
 
 {% macro sort_column(label, field) %}
 {% set rev = sort==field and not sort_asc and "1" or "" %}
-<a href="?sort={{field}}&asc={{ rev }}" style="color:">{{label}}</a>
+<a href="?sort={{field}}&asc={{ rev }}{% if request.args.f_attract %}&f_attract={{request.args.f_attract}}{% endif %}{% if request.args.f_station %}&f_station={{request.args.f_station}}{% endif %}{% if request.args.f_sessions %}&f_sessions={{request.args.f_sessions}}{% endif %}{% if request.args.f_min_photos %}&f_min_photos={{request.args.f_min_photos}}{% endif %}{% if request.args.f_min_hours %}&f_attract={{request.args.f_min_hours}}{% endif %}" style="color:">{{label}}</a>
 
 {% if sort==field %}
 {% if sort_asc %}&#x2193;{% else %}&#x2191;{% endif %}
@@ -40,6 +40,15 @@
             <option value="1" {% if request.args.f_sessions=="1" %}selected{% endif%}>One</option>
             <option value="2" {% if request.args.f_sessions=="2" %}selected{% endif%}>Two</option>
             <option value="3" {% if request.args.f_sessions=="3" %}selected{% endif%}>Three</option>
+          </select>
+        </p>
+        <p>
+          <label for="f_station">Station:</label>
+          <select name="f_station">
+            <option value="">(Any)</option>
+            {% for station in stations %}
+            <option value="{{station.id}}" {% if request.args.f_station==station.id %}selected{% endif%}>{{station.name}}</option>
+            {% endfor %}
           </select>
         </p>
         <p>

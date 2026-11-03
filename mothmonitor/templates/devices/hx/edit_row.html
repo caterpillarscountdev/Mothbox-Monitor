@@ -35,15 +35,23 @@
             hx-target="closest tr"
             hx-swap="outerHTML"
     >Save</button>
-    <button class="action" title="Invalidate key and generate new key"
-            hx-post="{{url_for('devices.create_key', device_id=device.id)}}"
-            hx-target="closest tr"
-            hx-swap="outerHTML"
-    >&#x26D4; Key &#x267B;</button>
     <button class="action" title="Cancel"
             hx-get="{{url_for('devices.device_show', device_id=device.id)}}"
             hx-target="closest tr"
             hx-swap="outerHTML"
     >&#x21A9;</button>
   </td>
+  <td>
+    <button class="action" title="Invalidate key and generate new key"
+            hx-post="{{url_for('devices.create_key', device_id=device.id)}}"
+            hx-target="closest tr"
+            hx-swap="outerHTML"
+    >&#x26D4; Key &#x267B;</button>
+    <button class="action" title="Retire"
+            hx-post="{{url_for('devices.retire', device_id=device.id)}}"
+            hx-target="closest tr"
+            hx-swap="innerHTML"
+    >Retire</button>
+  </td>
+    
 </tr>

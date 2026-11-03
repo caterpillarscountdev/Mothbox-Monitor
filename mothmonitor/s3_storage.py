@@ -8,6 +8,8 @@ from botocore.exceptions import ClientError
 
 from flask import current_app
 
+from sqlalchemy import or_
+
 from .models import db, Device, Night, has_stale_night
 from .jobs import enqueue_one
 
@@ -76,7 +78,11 @@ class S3Reader:
         try:
             devices = self.get_devices()
             for device_name in sorted(devices):
-                device = db.get_or_create(Device, name=device_name)
+                device = db.session.scalar(
+                    Device.select_active().filter_by(storage_subdir=device_name)
+                )
+                if not device:
+                    device = db.get_or_create(Device, name=device_name, retired=None)
                 device.last_refreshed = datetime.now()
                 n = self.get_device_nights(device_name)
                 for night_name in sorted(n, reverse=True):
@@ -90,9 +96,15 @@ class S3Reader:
                     last_modified = photos[-1]["lastModified"]
                     config = self.get_night_metadata_json(device_name, night_name)
                     night_date = dateutil.parser.parse(night_name).date()
-                    night = db.get_or_create(Night,
-                                             night=night_date,
-                                             device_id=device.id)
+                    night = db.session.scalar(
+                        db.select(Night).join(Night.device).filter((Night.night==night_date) &
+                                                ((Device.id==device.id) | (Device.name==device_name)))
+                    )
+                    if not night:
+                        night = Night(
+                            night=night_date,
+                            device_id=device.id)
+                        db.session.add(night)
 
                     night.photo_count = photo_count
                     night.last_modified = last_modified

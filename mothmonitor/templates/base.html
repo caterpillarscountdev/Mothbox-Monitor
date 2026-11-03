@@ -4,22 +4,23 @@
 
 {% macro render_pagination(pagination, endpoint=None) %}
 {% set endpoint = endpoint or request.endpoint %}
-{% set sort = request.args.get("sort") %}
-{% set asc = request.args.get("asc") %}
+{% set args = request.args.copy() %}
+{% set p = args.pop('page', None) %}
+
 <div class=pagination>
   <div>
     {{ pagination.first }} - {{ pagination.last }} of {{ pagination.total }}
   </div>
   <div>
     {% if pagination.has_prev %}
-    <a href="{{ url_for(endpoint, page=pagination.prev_num, sort=sort, asc=asc) }}">&#x2B9C;</a>
+    <a href="{{ url_for(endpoint, page=pagination.prev_num, **args) }}">&#x2B9C;</a>
     {% else %}
     <span class=inactive>&#x2B9C;</span>
     {% endif %}
     {% for page in pagination.iter_pages() %}
     {% if page %}
     {% if page != pagination.page %}
-    <a href="{{ url_for(endpoint, page=page, sort=sort, asc=asc) }}">{{ page }}</a>
+    <a href="{{ url_for(endpoint, page=page, **args) }}">{{ page }}</a>
     {% else %}
     <strong>{{ page }}</strong>
     {% endif %}
@@ -28,7 +29,7 @@
     {% endif %}
     {% endfor %}
     {% if pagination.has_next %}
-    <a href="{{ url_for(endpoint, page=pagination.next_num, sort=sort, asc=asc) }}">&#x2B9E;</a>
+    <a href="{{ url_for(endpoint, page=pagination.next_num, **args) }}">&#x2B9E;</a>
     {% else %}
     <span class=inactive>&#x2B9E;</span>
     {% endif %}
@@ -68,7 +69,7 @@
   <body>
     {% block body -%}
     <div class="pure-g">
-      <nav class="sidebar pure-u-1 pure-u-md-1-4">
+      <nav class="sidebar pure-u-1 pure-u-md-1-5">
         <header>
           <img src="/static/images/arctia_caja.svg" />
           <h1>Moth Monitor</h1>
@@ -100,7 +101,7 @@
           </ul>
         </div>
       </nav>
-      <main class="content pure-u-1 pure-u-md-3-4">
+      <main class="content pure-u-1 pure-u-md-4-5">
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
         <ul class="flashes">
