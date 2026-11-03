@@ -127,6 +127,7 @@ def download():
                 "device_id": n.device_id,
                 "device_label": n.device.label,
                 "night": n.night.strftime("%A, %b %-d %Y"),
+                "night_date": n.night.strftime("%F"),
                 "upload_date": n.last_modified and n.last_modified.strftime("%F") or "",
                 "photo_count": n.photo_count,
                 "attract_lights": config.get("attracts"),
