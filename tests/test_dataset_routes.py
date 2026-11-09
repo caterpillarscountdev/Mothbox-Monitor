@@ -3,6 +3,7 @@ from mothmonitor.models import Night, Device
 from mothmonitor import s3_storage
 import datetime
 import io
+import csv
 
 def make_boto_mock(mocker):
     c = mocker.patch("boto3.client")
@@ -237,3 +238,38 @@ def test_migrate_config_parsed(admin_client, night, night_2):
     assert nights[1].config["parsed"]["num_days"] == 3
     assert nights[1].config["parsed"]["attracts"] == 1
     assert nights[1].config["parsed"]["total_hours"] == 4.0
+
+
+def test_datasets_download_from_db(admin_client, mocker, night):
+    c = make_boto_mock(mocker)
+
+    night.config = s3_storage.config_parsed(night.config or {})
+    
+    res = admin_client.get('/datasets/download')
+
+    assert res.status_code == 200
+    assert res.mimetype == 'text/csv'
+    assert "MMM_dataset" in res.headers["Content-disposition"]
+    print(res.headers["Content-disposition"])
+    assert res.is_streamed == True
+    output = res.text.splitlines()
+    assert "device_id" in output[0]
+    assert "attract_lights" in output[0]
+    assert "hours_total" in output[0]
+    assert "Tuesday, Dec 30 2025" in output[1]
+
+    reader = iter(csv.reader(res.text.splitlines()))
+    headers = next(reader)
+    row = next(reader)
+    s = 16
+    assert headers[s] == "sampled_hour_21"
+    assert row[s] == "0"
+    assert row[s+1] == "55"
+    assert row[s+2] == "60"
+    assert row[s+3] == "5"
+    assert row[s+4] == "0"
+    assert row[s+5] == "55"
+    assert row[s+6] == "60"
+    assert row[s+7] == "5"
+
+    
