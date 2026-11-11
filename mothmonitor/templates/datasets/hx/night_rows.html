@@ -14,6 +14,23 @@
       hx-target="next tr"
       hx-swap="outerHTML"
   >{{night.photo_count}}</td>
+  <td>
+    {% if current_user.can("admin") %}    
+    <form id="night_row_{{night.id}}">
+      <select name="qc_reason"
+              class="{%if night.qc_reason %}qc_flag{% else %}qc_ok{% endif %}"
+              hx-post="{{url_for('datasets.night_qc', night_id=night.id)}}"
+              hx-on:htmx:config-request="cls = event.detail.parameters.qc_reason ? 'qc_flag' : 'qc_ok' ; this.className=cls"
+              hx-swap="none">
+        {% for val in qc_reasons %}
+        <option value="{{val}}" {{ selected_if(night.qc_reason == val)}}>{{qc_reasons[val]}}</option>
+        {% endfor %}
+      </select>
+    </form>
+    {% else %}
+    {{qc_reasons[val]}}
+    {% endif %}
+  </td>
   <td>{% if night.device.antenna_deployment %}<a href="{{station_url(night.device.antenna_deployment)}}">See Station</a>{% endif %}</td>
 </tr>
 <tr></tr>

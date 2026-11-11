@@ -118,6 +118,25 @@ span[data-title]:hover > * { user-select: auto }
     }
 }
 
+@keyframes fade-in {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+.fading {
+  animation: fade-in 3s ease-in both;
+}
+
+.qc_flag {
+    border: none;
+    border-bottom: 3px solid var(--error-color);
+    background-color: white;
+}
+.qc_ok {
+    border: none;
+    border-bottom: 3px solid  var(--ok-color);;
+    background-color: white;
+}
 
 .action {
     cursor: pointer;
