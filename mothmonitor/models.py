@@ -3,7 +3,7 @@ import datetime
 import secrets
 
 from sqlalchemy import ForeignKey, Integer, String, Text, DateTime, JSON, Table, Column
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, attributes
 
 
 from flask_security.models import fsqla_v3 as fsqla
@@ -50,8 +50,27 @@ class Night(db.Model):
     antenna_event: Mapped[Optional[int]] = mapped_column(nullable=True)
     
     device_id: Mapped[int] = mapped_column(ForeignKey("device.id"))
-    device: Mapped["Device"] = relationship(back_populates="nights")    
+    device: Mapped["Device"] = relationship(back_populates="nights")
 
+    @property
+    def qc_reason(self):
+        return self.config.get("annotations", {}).get("qc_reason", "")
+
+    @qc_reason.setter
+    def qc_reason(self, reason):
+        self.config["annotations"] = self.config.get("annotations", {})
+        self.config["annotations"]["qc_reason"] = reason
+        attributes.flag_modified(self, "config")
+
+    @property
+    def qc_by(self):
+        return self.config.get("annotations", {}).get("qc_by", "")
+
+    @qc_by.setter
+    def qc_by(self, reason):
+        self.config["annotations"] = self.config.get("annotations", {})
+        self.config["annotations"]["qc_by"] = reason
+        attributes.flag_modified(self, "config")
 
 class Device(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
