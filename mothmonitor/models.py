@@ -62,6 +62,16 @@ class Night(db.Model):
         self.config["annotations"]["qc_reason"] = reason
         attributes.flag_modified(self, "config")
 
+    @property
+    def qc_by(self):
+        return self.config.get("annotations", {}).get("qc_by", "")
+
+    @qc_by.setter
+    def qc_by(self, reason):
+        self.config["annotations"] = self.config.get("annotations", {})
+        self.config["annotations"]["qc_by"] = reason
+        attributes.flag_modified(self, "config")
+
 class Device(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(index=True, nullable=True)

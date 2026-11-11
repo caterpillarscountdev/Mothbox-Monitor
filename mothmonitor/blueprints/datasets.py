@@ -106,6 +106,7 @@ def night_qc(night_id):
     night = db.get_or_404(Night, night_id)
     reason = request.form.get('qc_reason')
     night.qc_reason = reason
+    night.qc_by = current_user.name
     db.session.commit()
     return "<span id='qc_status' hx-swap-oob='true' class='fading'>&#x2705;</span>"
 
@@ -148,6 +149,8 @@ def download():
                 "upload_date": n.last_modified and n.last_modified.strftime("%F") or "",
                 "photo_count": n.photo_count,
                 "attract_lights": config.get("attracts"),
+                "qc_flag": n.qc_reason,
+                "qc_by": n.qc_by,
                 "session_hours": n.config.get("schedule", {}).get("hour"),
                 "session_minute": n.config.get("schedule", {}).get("minute"),
                 "session_interval": n.config.get("schedule", {}).get("camera_interval"),
