@@ -48,7 +48,7 @@ def select_nights():
         # restrict query to assigned devices
         select = select.join(Night.device).filter(Device.id.in_(ids))
 
-    filters = { k: request.args.get(k) for k in request.args.keys() if k.startswith("f_") and request.args.get(k) not in ("", None, "0") }
+    filters = { k: request.args.get(k) for k in request.args.keys() if k.startswith("f_") and (request.args.get(k) not in ("", None, "0") or k == 'f_qc') }
     if filters:
         if filters.get("f_attract"):
             select = select.filter(Night.config[("parsed", "attracts")].as_integer() == int(filters.get("f_attract")))
@@ -60,6 +60,14 @@ def select_nights():
             select = select.filter(Night.photo_count >= int(filters.get("f_min_photos")))
         if filters.get("f_station"):
             select = select.join(Night.device).filter(Device.antenna_deployment == int(filters.get("f_station")))
+        if filters.get("f_qc") is not None:
+            qc = filters.get('f_qc')
+            if qc == 'flagged':
+                select = select.filter(Night.config[("annotations", "qc_reason")].as_string() != '')
+            elif qc == '':
+                select = select.filter((Night.config[("annotations", "qc_reason")].as_string() == qc) | (Night.config[("annotations", "qc_reason")].as_boolean() == None))
+            elif qc != 'any':
+                select = select.filter(Night.config[("annotations", "qc_reason")].as_string() == qc)
     return select
 
 

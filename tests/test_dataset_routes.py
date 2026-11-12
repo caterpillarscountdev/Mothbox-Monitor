@@ -261,7 +261,7 @@ def test_datasets_download_from_db(admin_client, mocker, night):
     reader = iter(csv.reader(res.text.splitlines()))
     headers = next(reader)
     row = next(reader)
-    s = 16
+    s = 18
     assert headers[s] == "sampled_hour_21"
     assert row[s] == "0"
     assert row[s+1] == "55"

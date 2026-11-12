@@ -50,6 +50,14 @@
             <option value="{{station.id}}" {% if request.args.f_station==station.id %}selected{% endif%}>{{station.name}}</option>
             {% endfor %}
           </select>
+          <label for="f_qc">QC Flag:</label>
+          <select name="f_qc" style="margin-left: 1em;">
+            <option value="any" {{selected_if(request.args.f_qc=='any')}}>(Any)</option>
+            <option value="flagged" {{selected_if(request.args.f_qc=='flagged')}}>(Any Flagged)</option>
+            {% for reason in qc_reasons %}
+            <option value="{{reason}}" {% if request.args.f_qc==reason %}selected{% endif%}>{{qc_reasons[reason] or "(Unflagged)"}}</option>
+            {% endfor %}
+          </select>
         </p>
         <p>
           <label for="f_min_photos">At least
